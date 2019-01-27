@@ -2,6 +2,8 @@
 
 ...launching soon... 8)
 
+<img src="http://xoblite.net/breakouts/breakouts.jpg" width="100%" height="100%">
+
 Enjoy! :sunglasses:
 
 BR//KHH \[xoblite\]
