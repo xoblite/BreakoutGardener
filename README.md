@@ -19,6 +19,8 @@ Breakout Gardener will initially support the following devices and sensors (I2C 
 
 It will also support additional display modes through its **SYSTEM**, **CLOCK** and **KOMPIS** modules, as well as a HTML5/CSS3 browser **DASHBOARD** module (see image above) that provides an overview of the current status and readings of all sensors and devices available on the system (nb. the "Shop" button is there just to support the tinkering community's favourite suppliers; [Pimoroni (UK)](https://pimoroni.com/) and [Adafruit Industries (US)](https://www.adafruit.com/) (no affiliation to either, I just like their products and geeky dedication :wink:)).
 
+Anyway, without further ado:
+
 *- Install Node.js*<br>*- Clone this repository*<br>*- Install i2c-bus*<br>*- Run!*
 
 Enjoy! :sunglasses:
