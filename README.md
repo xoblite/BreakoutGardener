@@ -23,6 +23,8 @@ It will also support additional display modes through its **SYSTEM**, **CLOCK** 
 
 Enjoy! :sunglasses:
 
+...and if you do, please Star, and perhaps also tag me on Twitter ([@xoblite](https://twitter.com/xoblite)) or Instagram ([@xoblitedotnet](https://www.instagram.com/xoblitedotnet/)). Thanks! ::smile:
+
 BR//KHH \[xoblite\]
 
 ========================
