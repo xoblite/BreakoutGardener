@@ -6,16 +6,16 @@
 
 Breakout Gardener will initially support the following devices and sensors (I2C unless otherwise noted) through modules:
 
-- **ADS1015**: Texas Instruments ADS1015 Analog-To-Digital Converter
-- **BMP280**: Bosch Sensortec BMP280 Barometric Pressure Sensor
-- **CAP1166**: Microchip Technology CAP1166 Capacitive Touch Controller
-- **DS18B20**: Maxim Integrated DS18B20 Digital Thermometer (1-Wire)
-- **IS31FL3731**: Integrated Silicon Solution Inc (ISSI) IS31FL3731 Matrix LED Driver
-- **LSM303D**: STMicroelectronics LSM303D eCompass 3D Accelerometer and 3D Magnetometer
-- **MCP9808**: Microchip Technology MCP9808 Digital Temperature Sensor
-- **SH1107**: Display Future / Sino Wealth SH1107 Dot Matrix (128x128 pixel) Mono OLED Driver/Controller
-- **TCS3472**: ams TCS3472 Color Light Sensor
-- **VEML6075**: Vishay Semiconductors VEML6075 UVA and UVB Light Sensor
+- **ADS1015**: Texas Instruments ADS1015 Analog-To-Digital Converter ([example](https://shop.pimoroni.com/products/enviro-phat))
+- **BMP280**: Bosch Sensortec BMP280 Barometric Pressure Sensor ([example](https://shop.pimoroni.com/products/enviro-phat))
+- **CAP1166**: Microchip Technology CAP1166 Capacitive Touch Controller ([example](https://shop.pimoroni.com/products/touch-phat))
+- **DS18B20**: Maxim Integrated DS18B20 Digital Thermometer (1-Wire) ([example](https://www.adafruit.com/product/381))
+- **IS31FL3731**: Integrated Silicon Solution Inc (ISSI) IS31FL3731 Matrix LED Driver ([example](https://shop.pimoroni.com/products/5x5-rgb-matrix-breakout))
+- **LSM303D**: STMicroelectronics LSM303D eCompass 3D Accelerometer and 3D Magnetometer ([example](https://shop.pimoroni.com/products/enviro-phat))
+- **MCP9808**: Microchip Technology MCP9808 Digital Temperature Sensor ([example](https://www.adafruit.com/product/1782))
+- **SH1107**: Display Future / Sino Wealth SH1107 Dot Matrix (128x128 pixel) Mono OLED Driver/Controller ([example](https://shop.pimoroni.com/products/1-12-oled-breakout))
+- **TCS3472**: ams TCS3472 Color Light Sensor ([example](https://shop.pimoroni.com/products/enviro-phat))
+- **VEML6075**: Vishay Semiconductors VEML6075 UVA and UVB Light Sensor ([example](https://www.adafruit.com/product/3964))
 
 It will also support additional display modes through its **SYSTEM**, **CLOCK** and **KOMPIS** modules, as well as a HTML5/CSS3 browser **DASHBOARD** module (see image above) that provides an overview of the current status and readings of all sensors and devices available on the system.
 
