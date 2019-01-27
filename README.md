@@ -19,7 +19,7 @@ Breakout Gardener will initially support the following devices and sensors (I2C 
 - **TCS3472**: ams TCS3472 Color Light Sensor
 - **VEML6075**: Vishay Semiconductors VEML6075 UVA and UVB Light Sensor
 
-It also supports additional display modes through its **SYSTEM** and **CLOCK** modules, as well as the HTML5/CSS3 browser **DASHBOARD** module (see image above) that provides an overview of the current status and readings of all sensors and devices available on the system.
+It also supports additional display modes through its **SYSTEM**, **CLOCK** and **KOMPIS** modules, as well as the HTML5/CSS3 browser **DASHBOARD** module (see image above) that provides an overview of the current status and readings of all sensors and devices available on the system.
 
 Enjoy! :sunglasses:
 
