@@ -1,6 +1,4 @@
-# Breakout Gardener
-
-(...launching soon...)
+...launching soon... (teaser preview)
 
 <img src="http://xoblite.net/breakouts/breakouts.jpg" width="100%" height="100%">
 
