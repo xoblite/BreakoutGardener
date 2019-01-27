@@ -5,7 +5,7 @@
 **Breakout Gardener** is a framework application based on [Node.js®](https://nodejs.org/) and using the [i2c-bus](https://github.com/fivdi/i2c-bus) library.
 The name is a pun on the Pimoroni [Breakout Garden](https://shop.pimoroni.com/collections/breakout-garden), as the project started out as a way to present various sensor data on that system's OLED display. As geeky projects often do, however, it eventually grew into something bigger, with more elaborate interworking...
 
-Breakout Gardener will initially support the following devices and sensors (I2C unless otherwise noted) through modules:
+Breakout Gardener initially supports the following devices and sensors (I2C unless otherwise noted) through modules:
 
 - **ADS1015**: Texas Instruments ADS1015 Analog-To-Digital Converter ([example](https://shop.pimoroni.com/products/enviro-phat))
 - **BMP280**: Bosch Sensortec BMP280 Barometric Pressure Sensor ([example](https://shop.pimoroni.com/products/enviro-phat))
@@ -18,7 +18,7 @@ Breakout Gardener will initially support the following devices and sensors (I2C 
 - **TCS3472**: ams TCS3472 Color Light Sensor ([example](https://shop.pimoroni.com/products/enviro-phat))
 - **VEML6075**: Vishay Semiconductors VEML6075 UVA and UVB Light Sensor ([example](https://www.adafruit.com/product/3964))
 
-It will also support additional display modes through its **SYSTEM**, **CLOCK** and **KOMPIS** modules, as well as a HTML5/CSS3 browser **DASHBOARD** module (see image above) that provides an overview of the current status and readings of all sensors and devices available on the system (nb. the "Shop" button is there just to support the tinkering community's favourite suppliers; [Pimoroni (UK)](https://pimoroni.com/) and [Adafruit Industries (US)](https://www.adafruit.com/) (no affiliation to either, I just like their products and geeky dedication to the cause :wink:)).
+It also supports additional display modes through its **SYSTEM**, **CLOCK** and **KOMPIS** modules, as well as a HTML5/CSS3 browser **DASHBOARD** module (see image above) that provides an overview of the current status and readings of all sensors and devices available on the system (nb. the "Shop" button is there just to support the tinkering community's favourite suppliers; [Pimoroni (UK)](https://pimoroni.com/) and [Adafruit Industries (US)](https://www.adafruit.com/) (no affiliation to either, I just like their products and geeky dedication to the cause :wink:)).
 
 Anyway, without further ado:
 
