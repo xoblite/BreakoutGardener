@@ -1,6 +1,6 @@
-...launching soon... (teaser preview)
-
 <img src="http://xoblite.net/breakouts/breakouts.jpg" width="100%" height="100%">
+
+*...launching soon... (teaser preview :wink:)*
 
 **Breakout Gardener** is a framework application based on [Node.js®](https://nodejs.org/) and using the [i2c-bus](https://github.com/fivdi/i2c-bus) library.
 
