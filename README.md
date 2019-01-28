@@ -10,7 +10,7 @@ Breakout Gardener initially supports the following devices and sensors (I2C unle
 - **ADS1015**: Texas Instruments ADS1015 Analog-To-Digital Converter ([example](https://shop.pimoroni.com/products/enviro-phat))
 - **BMP280**: Bosch Sensortec BMP280 Barometric Pressure Sensor ([example](https://shop.pimoroni.com/products/enviro-phat))
 - **CAP1166**: Microchip Technology CAP1166 Capacitive Touch Controller ([example](https://shop.pimoroni.com/products/touch-phat))
-- **DS18B20**: Maxim Integrated DS18B20 Digital Thermometer (1-Wire) ([example](https://www.adafruit.com/product/381))
+- **DS18B20**: Maxim Integrated DS18B20 Digital Thermometer ([1-Wire](https://pinout.xyz/pinout/1_wire)) ([example](https://www.adafruit.com/product/381))
 - **IS31FL3731**: Integrated Silicon Solution Inc (ISSI) IS31FL3731 Matrix LED Driver ([example](https://shop.pimoroni.com/products/5x5-rgb-matrix-breakout))
 - **LSM303D**: STMicroelectronics LSM303D eCompass 3D Accelerometer and 3D Magnetometer ([example](https://shop.pimoroni.com/products/enviro-phat))
 - **MCP9808**: Microchip Technology MCP9808 Digital Temperature Sensor ([example](https://www.adafruit.com/product/1782))
