@@ -1,6 +1,6 @@
 <img src="http://xoblite.net/breakouts/breakouts.jpg" width="100%" height="100%">
 
-*...launching soon... (teaser preview :wink:)*
+*RELEASE CANDIDATE #1 / PREVIEW RELEASE*
 
 **Breakout Gardener** is a framework application based on [Node.js®](https://nodejs.org/) and using the [i2c-bus](https://github.com/fivdi/i2c-bus) library.
 The name is a pun on the Pimoroni [Breakout Garden](https://shop.pimoroni.com/collections/breakout-garden), as the project started out as a way to present various sensor data on that system's OLED display. As geeky projects often do, however, it eventually grew into something bigger, with more elaborate interworking...
