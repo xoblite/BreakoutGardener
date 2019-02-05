@@ -29,11 +29,11 @@ module.exports = {
 
 var I2C_BUS = 0, I2C_ADDRESS_IS31FL3731 = 0;
 const DISPLAY_WIDTH = 5, DISPLAY_HEIGHT = 5;
-var displayBuffer = [0x0000ff, 0x0000ff, 0xcc8800, 0x0000ff, 0x0000ff,
-					 0x0000ff, 0x0000ff, 0xcc8800, 0x0000ff, 0x0000ff,
-					 0xcc8800, 0xcc8800, 0xcc8800, 0xcc8800, 0xcc8800,
-					 0x0000ff, 0x0000ff, 0xcc8800, 0x0000ff, 0x0000ff,
-					 0x0000ff, 0x0000ff, 0xcc8800, 0x0000ff, 0x0000ff ];
+var displayBuffer = [0x000000, 0x000000, 0x000000, 0x000000, 0x000000,
+					 0x000000, 0x000000, 0x000000, 0x000000, 0x000000,
+					 0x000000, 0x000000, 0x000000, 0x000000, 0x000000,
+					 0x000000, 0x000000, 0x000000, 0x000000, 0x000000,
+					 0x000000, 0x000000, 0x000000, 0x000000, 0x000000 ];
 var outputLogs = false, showDebug = false;
 
 // ====================
@@ -62,9 +62,11 @@ function Start(logs, debug)
     if (logs) outputLogs = true;
 	if (debug) showDebug = true;
 
+	Off();
+
 	// Configure the device...
 	I2C_BUS.writeByteSync(I2C_ADDRESS_IS31FL3731, 0xfd, 0x0b); // Point to Function (Control) Register
-//	I2C_BUS.writeByteSync(I2C_ADDRESS_IS31FL3731, 0x0a, 0b00000000); // Shutdown Register -> Power Off ("Shutdown Mode")
+	// I2C_BUS.writeByteSync(I2C_ADDRESS_IS31FL3731, 0x0a, 0b00000000); // Shutdown Register -> Power Off ("Shutdown Mode")
 	I2C_BUS.writeByteSync(I2C_ADDRESS_IS31FL3731, 0x00, 0b00000000); // Configuration Register -> Picture Mode
 	I2C_BUS.writeByteSync(I2C_ADDRESS_IS31FL3731, 0x01, 0b00000000); // Picture Display Register -> Display Frame 1
 	I2C_BUS.writeByteSync(I2C_ADDRESS_IS31FL3731, 0x02, 0b00000000); // Auto Play Control Register 1 -> Defaults/NA
@@ -75,7 +77,10 @@ function Start(logs, debug)
 	I2C_BUS.writeByteSync(I2C_ADDRESS_IS31FL3731, 0x09, 0b00000000); // Breath Control Register 2 -> Defaults
 	I2C_BUS.writeByteSync(I2C_ADDRESS_IS31FL3731, 0x0b, 0b00000000); // AGC Control Register -> Defaults/NA
 	I2C_BUS.writeByteSync(I2C_ADDRESS_IS31FL3731, 0x0c, 0b00000000); // Audio ADC Rate Register -> Defaults/NA
-	I2C_BUS.writeByteSync(I2C_ADDRESS_IS31FL3731, 0x0a, 0b00000001); // Shutdown Register -> Power On ("Normal Operation")
+	// I2C_BUS.writeByteSync(I2C_ADDRESS_IS31FL3731, 0x0a, 0b00000001); // Shutdown Register -> Power On ("Normal Operation")
+
+	Clear();
+	On();
 }
 
 function Stop() { Off(); }
@@ -101,8 +106,8 @@ function Clear()
 	// Clear all pixels...
 	// (nb. for ease-of-use we do this by *dimming* them all to zero, *not* by turning them all off)
 	I2C_BUS.writeByteSync(I2C_ADDRESS_IS31FL3731, 0xfd, 0x00); // Point to Picture Frame 1 Register
-	for (n = 0x00; n<=0x11; n++) I2C_BUS.writeByteSync(I2C_ADDRESS_IS31FL3731, n, 0xff); // (1) Turn on all LEDs (R+G+B)
-	for (n = 0x24; n<=0xb3; n++) I2C_BUS.writeByteSync(I2C_ADDRESS_IS31FL3731, n, 0x00); // (2) Dim all LEDs (R+G+B) to zero
+	for (n = 0x24; n<=0xb3; n++) I2C_BUS.writeByteSync(I2C_ADDRESS_IS31FL3731, n, 0x00); // (1) Dim all LEDs (R+G+B) to zero
+	for (n = 0x00; n<=0x11; n++) I2C_BUS.writeByteSync(I2C_ADDRESS_IS31FL3731, n, 0xff); // (2) Turn on all LEDs (R+G+B)
 	displayBuffer.fill(0x000000); // Clear the display buffer as well...
 	// if (showDebug) console.log("Breakout Gardener -> IS31FL3731 -> Clearing the display...");
 }
