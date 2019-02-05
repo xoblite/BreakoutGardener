@@ -1,4 +1,4 @@
-<img src="http://xoblite.net/breakouts/breakouts.jpg" width="100%" height="100%">
+<img src="http://xoblite.net/breakouts/breakouts.png" width="100%" height="100%">
 
 *PREVIEW RELEASE == REQUEST FOR EARLY FEEDBACK :wink:*
 
