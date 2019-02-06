@@ -39,7 +39,7 @@ const dashboardEnabled = true; // Enable dashboard server?
 const dashboardPort = 8080; // Dashboard server port (when enabled)
 
 // PROMETHEUS related settings
-const prometheusEnabled = false; // Enable Prometheus exposure server?
+const prometheusEnabled = true; // Enable Prometheus exposure server?
 const prometheusPort = 9091; // Prometheus exposure server port (when enabled)
 
 // DS18B20 related settings
