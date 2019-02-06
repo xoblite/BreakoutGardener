@@ -78,7 +78,7 @@ function Stop() { return; }
 
 function Get()
 {
-	if (IS31FL3731.IsAvailable()) IS31FL3731.Clear(); // Clear ("turn off") the display to prevent it from affecting our light readings
+	// if (IS31FL3731.IsAvailable()) IS31FL3731.Clear(); // Clear ("turn off") the display to prevent it from affecting our light readings
 
 	// ====================
 
