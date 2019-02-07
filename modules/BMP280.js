@@ -62,7 +62,7 @@ function Start(logs, debug)
 
 	// Configure the device...
 	I2C_BUS.writeByteSync(I2C_ADDRESS_BMP280, 0xe0, 0xb6); // Reset the sensor
-	I2C_BUS.writeByteSync(I2C_ADDRESS_BMP280, 0xf4, 0b10110111); // Temp @ oversampling 16x, Pressure @ oversampling 16x, Normal mode
+	I2C_BUS.writeByteSync(I2C_ADDRESS_BMP280, 0xf4, 0b10110111); // Temp oversampling 16x, Pressure oversampling 16x, Normal (continuous) mode
 	I2C_BUS.writeByteSync(I2C_ADDRESS_BMP280, 0xf5, 0b10010000); // 500 ms interval ("inactive duration"), IIR filter @ standard resolution
 
 	// Read temperature calibration data from the sensor...
@@ -98,50 +98,30 @@ function Get()
 	var readBuffer = Buffer.alloc(6, 0x00); // 3 bytes temperature (20 bits) + 3 bytes pressure (20 bits)
 	I2C_BUS.readI2cBlockSync(I2C_ADDRESS_BMP280, 0xf7, 6, readBuffer);
 
-	// var readTemp = readBuffer.readUInt8(3)*255*255 + readBuffer.readUInt8(4)*255 + readBuffer.readUInt8(5);
-	var readTemp = (readBuffer.readInt8(3) << 12) + (readBuffer.readUInt8(4) << 4) +(readBuffer.readUInt8(5) >> 4);
+	// Apply temperature compensation formula according to the BMP280 datasheet... (yes, this is fugly!)
+	var readTemp = (readBuffer.readInt8(3) << 12) + (readBuffer.readUInt8(4) << 4) + (readBuffer.readUInt8(5) >> 4); // MSB 8 bits, LSB 8 bits, XLSB 4 bits
 	var var1 = ((readTemp / 16384) - (bmp280DigT1 / 1024)) * bmp280DigT2;
 	var var2 = ((readTemp / 131072) - (bmp280DigT1 / 8192)) * ((readTemp / 131072) - (bmp280DigT1 / 8192)) * bmp280DigT3;
 	var fineTemp = (var1 + var2);
-	data[0] = (var1 + var2) / 5120; // Temperature in °C (float)
-	/*
-	var var1 = ((((readTemp >> 3) - (bmp280DigT1 << 1))) * bmp280DigT2) >> 11;
-	var var2 = (((((readTemp >> 4) - bmp280DigT1) * ((readTemp >> 4) - bmp280DigT1) >> 12) * bmp280DigT3)) >> 14;
-	var fineTemp = var1 + var2;
-	var calibratedTemp = (((fineTemp * 5) + 128) >> 8) / 100; // Temperature in °C (float)
-	*/
+	data[0] = (var1 + var2) / 5120; // -> Temperature in °C (float)
 
-	// var readPres = readBuffer.readUInt8(0)*255*255 + readBuffer.readUInt8(1)*255 + readBuffer.readUInt8(2);
-	var readPres = (readBuffer.readUInt8(0) << 12) + (readBuffer.readUInt8(1) << 4 ) +(readBuffer.readUInt8(2) >> 4);
+	// Apply pressure compensation formula according to the BMP280 datasheet... (yes, this is fugly!)
+	var readPres = (readBuffer.readUInt8(0) << 12) + (readBuffer.readUInt8(1) << 4 ) + (readBuffer.readUInt8(2) >> 4); // MSB 8 bits, LSB 8 bits, XLSB 4 bits
 	var1 = (fineTemp / 2) - 64000;
 	var2 = (var1 * var1 * bmp280DigP6) / 32768;
 	var2 = var2 + (var1 * bmp280DigP5 * 2);
 	var2 = (var2 / 4) + (bmp280DigP4 * 65536);
 	var1 = (((bmp280DigP3 * var1 * var1) / 524288) + (bmp280DigP2 * var1)) / 524288;
 	var1 = (1 + (var1 / 32768)) * bmp280DigP1;
-	var var3 = 1048576 - readPres;
-	var3 = ((var3 - (var2 / 4096)) * 6250) / var1;
-	var1 = (bmp280DigP9 * var3 * var3) / 2147483648;
-	var2 = (var3 * bmp280DigP8) / 32768;
-	data[1] = (var3 + ((var1 + var2 + bmp280DigP7) / 16)) / 100; // Pressure in hPa (float)
-	/*
-	var1 = fineTemp - 128000;
-	var2 = var1 * var1 * bmp280DigP6;
-	var2 = var2 + ((var1 * bmp280DigP5) << 17);
-	var2 = var2 + (bmp280DigP4 << 35);
-	var1 = ((var1 * var1 * bmp280DigP3) >> 8) + ((var1 * bmp280DigP2) << 12);
-	var1 = ((1<<47) + var1) * (bmp280DigP1 >> 33);
-	var calibratedPres = 0.0;
-	if (var1 != 0)
+	if (var1 == 0.0) data[1] = 0.0;
+	else
 	{
 		var var3 = 1048576 - readPres;
-		var3 = (((var3 << 31) - var2) * 3125) / var1;
-		var1 = (bmp280DigP9 * (var3 >> 13) * (var3 >> 13)) >> 25;
-		var2 = (bmp280DigP8 * var3) >> 19;
-		calibratedPres = ((var3 + var1 + var2) >> 8) + (bmp280DigP7 << 4);
-		calibratedPres /= 100; // Pressure in hPa (float)
+		var3 = ((var3 - (var2 / 4096)) * 6250) / var1;
+		var1 = (bmp280DigP9 * var3 * var3) / 2147483648;
+		var2 = (var3 * bmp280DigP8) / 32768;
+		data[1] = (var3 + ((var1 + var2 + bmp280DigP7) / 16)) / 100; // -> Pressure in hPa (float)	
 	}
-	*/
 
 	return data;
 }
@@ -171,7 +151,6 @@ function Display(refreshAll)
 			SH1107.DrawTextSmall("NEARBY (BMP280)", 12, 16, false);
 		}
 
-		// Display the temperature rounded to the nearest integer...
 		var roundedTemperature = Math.round(data[0]);
 		var textString = roundedTemperature.toString();
 		if (roundedTemperature > 10)
