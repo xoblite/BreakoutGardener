@@ -5,9 +5,10 @@
 **Breakout Gardener** is a framework application based on [Node.js®](https://nodejs.org/) using the [i2c-bus](https://github.com/fivdi/i2c-bus) library.
 The name is a pun on the Pimoroni [Breakout Garden](https://shop.pimoroni.com/collections/breakout-garden), as the project started out as a way to present various sensor data on that system's OLED display. As geeky projects often do, however, it eventually grew into something bigger, with more elaborate interworking...
 
-Breakout Gardener initially supports the following devices and sensors (I2C unless otherwise noted) through modules:
+Breakout Gardener currently supports the following devices and sensors (I2C unless otherwise noted) through modules:
 
 - **ADS1015**: Texas Instruments ADS1015 Analog-To-Digital Converter ([example](https://shop.pimoroni.com/products/enviro-phat))
+- **ADT7410**: Analog Devices ADT7410 Digital Temperature Sensor ([example](https://www.adafruit.com/product/4089)) (**preliminary**)
 - **BMP280**: Bosch Sensortec BMP280 Barometric Pressure Sensor ([example](https://shop.pimoroni.com/products/enviro-phat))
 - **CAP1166**: Microchip Technology CAP1166 Capacitive Touch Controller ([example](https://shop.pimoroni.com/products/touch-phat))
 - **DS18B20**: Maxim Integrated DS18B20 Digital Thermometer ([1-Wire](https://pinout.xyz/pinout/1_wire)) ([example](https://www.adafruit.com/product/381))
