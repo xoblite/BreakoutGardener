@@ -8,7 +8,7 @@ The name is a pun on the Pimoroni [Breakout Garden](https://shop.pimoroni.com/co
 Breakout Gardener currently supports the following devices and sensors (I2C unless otherwise noted) through modules:
 
 - **ADS1015**: Texas Instruments ADS1015 Analog-To-Digital Converter ([example](https://shop.pimoroni.com/products/enviro-phat))
-- _**ADT7410**: Analog Devices ADT7410 Digital Temperature Sensor ([example](https://www.adafruit.com/product/4089)) (**preliminary**)_
+- **ADT7410**: Analog Devices ADT7410 Digital Temperature Sensor ([example](https://www.adafruit.com/product/4089)) _(preliminary/untested)_
 - **BMP280**: Bosch Sensortec BMP280 Barometric Pressure Sensor ([example](https://shop.pimoroni.com/products/enviro-phat))
 - **CAP1166**: Microchip Technology CAP1166 Capacitive Touch Controller ([example](https://shop.pimoroni.com/products/touch-phat))
 - **DS18B20**: Maxim Integrated DS18B20 Digital Thermometer ([1-Wire](https://pinout.xyz/pinout/1_wire)) ([example](https://www.adafruit.com/product/381))
