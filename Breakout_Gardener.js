@@ -5,11 +5,12 @@
 // ============================================================================================
 
 const softwareName = "Breakout Gardener";
-const softwareVersion = "19.2.5";
+const softwareVersion = "19.2.8";
 
 const I2C = require('./modules/I2C.js'); // Requires the i2c-bus library -> https://github.com/fivdi/i2c-bus
 
 const ADS1015 = require('./modules/ADS1015.js');
+const ADT7410 = require('./modules/ADT7410.js');
 const BMP280 = require('./modules/BMP280.js');
 const CAP1166 = require('./modules/CAP1166.js');
 const DS18B20 = require('./modules/DS18B20.js');
@@ -79,6 +80,7 @@ if (SH1107.IsAvailable()) SH1107.Start(outputLogs, showDebug);
 if (IS31FL3731.IsAvailable()) IS31FL3731.Start(outputLogs, showDebug);
 
 if (ADS1015.IsAvailable()) ADS1015.Start(outputLogs, showDebug);
+if (ADT7410.IsAvailable()) ADT7410.Start(outputLogs, showDebug);
 if (BMP280.IsAvailable()) BMP280.Start(outputLogs, showDebug);
 if (CAP1166.IsAvailable()) CAP1166.Start(outputLogs, showDebug);
 if (LSM303D.IsAvailable()) LSM303D.Start(lsm303dHeadingCalibration, lsm303dDisplayRaw, outputLogs, showDebug);
@@ -102,12 +104,13 @@ const DISPLAY_MODE_SYSTEM_LOAD = 2;
 const DISPLAY_MODE_24H_CLOCK = 3;
 const DISPLAY_MODE_KOMPIS_FRIEND = 4;
 const DISPLAY_MODE_ADS1015 = 5;
-const DISPLAY_MODE_BMP280 = 6;
-const DISPLAY_MODE_DS18B20 = 7;
-const DISPLAY_MODE_LSM303D = 8;
-const DISPLAY_MODE_MCP9808 = 9;
-const DISPLAY_MODE_TCS3472 = 10; 
-const DISPLAY_MODE_VEML6075 = 11;
+const DISPLAY_MODE_ADT7410 = 6;
+const DISPLAY_MODE_BMP280 = 7;
+const DISPLAY_MODE_DS18B20 = 8;
+const DISPLAY_MODE_LSM303D = 9;
+const DISPLAY_MODE_MCP9808 = 10;
+const DISPLAY_MODE_TCS3472 = 11; 
+const DISPLAY_MODE_VEML6075 = 12;
 
 // The actual order of the display modes... (auto-rotating unless locked)
 const displayModes = [
@@ -115,6 +118,7 @@ const displayModes = [
     DISPLAY_MODE_CPU_LOAD_BARS,
     DISPLAY_MODE_SYSTEM_LOAD,
     DISPLAY_MODE_MCP9808,
+    DISPLAY_MODE_ADT7410,
     DISPLAY_MODE_BMP280,
     DISPLAY_MODE_DS18B20,
     DISPLAY_MODE_TCS3472,
@@ -141,29 +145,59 @@ function updateDisplayMode()
     var refreshAll = true;
     if (currentDisplayMode == previousDisplayMode) refreshAll = false;
 
+    // ====================
+
+    var moduleIsAvailable = false;
+
     switch (displayModes[currentDisplayMode])
     {
-        case DISPLAY_MODE_CPU_LOAD_BARS:{ SYSTEM.DisplayLoad(refreshAll); break; }
-        case DISPLAY_MODE_SYSTEM_LOAD: { SYSTEM.DisplayInfo(refreshAll); break; }
-        case DISPLAY_MODE_24H_CLOCK: { CLOCK.Display(refreshAll); break; }
-        case DISPLAY_MODE_KOMPIS_FRIEND: { KOMPIS.Display(refreshAll); break; }
-        case DISPLAY_MODE_ADS1015: { ADS1015.Display(refreshAll); break; }
-        case DISPLAY_MODE_BMP280: { BMP280.Display(refreshAll); break; }
-        case DISPLAY_MODE_DS18B20: { DS18B20.Display(refreshAll); break; }
-        case DISPLAY_MODE_LSM303D: { LSM303D.Display(refreshAll); break; }
-        case DISPLAY_MODE_MCP9808: { MCP9808.Display(refreshAll); break; }
-        case DISPLAY_MODE_TCS3472: { TCS3472.Display(refreshAll); break; }
-        case DISPLAY_MODE_VEML6075: { VEML6075.Display(refreshAll); break; }
+        case DISPLAY_MODE_CPU_LOAD_BARS:
+        case DISPLAY_MODE_SYSTEM_LOAD:
+        case DISPLAY_MODE_24H_CLOCK:
+        case DISPLAY_MODE_KOMPIS_FRIEND: { moduleIsAvailable = true; break; }
+        case DISPLAY_MODE_ADS1015: { if (ADS1015.IsAvailable()) moduleIsAvailable = true; break; }
+        case DISPLAY_MODE_ADT7410: { if (ADT7410.IsAvailable()) moduleIsAvailable = true; break; }
+        case DISPLAY_MODE_BMP280: { if (BMP280.IsAvailable()) moduleIsAvailable = true; break; }
+        case DISPLAY_MODE_DS18B20: { if (DS18B20.IsAvailable()) moduleIsAvailable = true; break; }
+        case DISPLAY_MODE_LSM303D: { if (LSM303D.IsAvailable()) moduleIsAvailable = true; break; }
+        case DISPLAY_MODE_MCP9808: { if (MCP9808.IsAvailable()) moduleIsAvailable = true; break; }
+        case DISPLAY_MODE_TCS3472: { if (TCS3472.IsAvailable()) moduleIsAvailable = true; break; }
+        case DISPLAY_MODE_VEML6075: { if (VEML6075.IsAvailable()) moduleIsAvailable = true; break; }
         default: { break; }
     }
 
-    previousDisplayMode = currentDisplayMode;
+    // ====================
+
+    if (moduleIsAvailable)
+    {
+        switch (displayModes[currentDisplayMode])
+        {
+            case DISPLAY_MODE_CPU_LOAD_BARS: { SYSTEM.DisplayLoad(refreshAll); break; }
+            case DISPLAY_MODE_SYSTEM_LOAD: { SYSTEM.DisplayInfo(refreshAll); break; }
+            case DISPLAY_MODE_24H_CLOCK: { CLOCK.Display(refreshAll); break; }
+            case DISPLAY_MODE_KOMPIS_FRIEND: { KOMPIS.Display(refreshAll); break; }
+            case DISPLAY_MODE_ADS1015: { ADS1015.Display(refreshAll); break; }
+            case DISPLAY_MODE_ADT7410: { ADT7410.Display(refreshAll); break; }
+            case DISPLAY_MODE_BMP280: { BMP280.Display(refreshAll); break; }
+            case DISPLAY_MODE_DS18B20: { DS18B20.Display(refreshAll); break; }
+            case DISPLAY_MODE_LSM303D: { LSM303D.Display(refreshAll); break; }
+            case DISPLAY_MODE_MCP9808: { MCP9808.Display(refreshAll); break; }
+            case DISPLAY_MODE_TCS3472: { TCS3472.Display(refreshAll); break; }
+            case DISPLAY_MODE_VEML6075: { VEML6075.Display(refreshAll); break; }
+            default: { break; }
+        }
+    
+        previousDisplayMode = currentDisplayMode;
+    }
+
+    // ====================
 
     if (displayModeAutoRotate) // Display mode auto-rotating
     {
         currentDisplayMode++;
         if (currentDisplayMode == displayModes.length) currentDisplayMode = 0;
-        displayModeInterval = setInterval(updateDisplayMode, 5000); // Display mode rotating -> Lower refresh rate
+        if (moduleIsAvailable) displayModeInterval = setInterval(updateDisplayMode, 5000); // Display mode rotating -> Lower refresh rate
+        else displayModeInterval = setInterval(updateDisplayMode, 10); // Module not available -> Switch to the next display mode immediately
     }
     else // Display mode locked
     {
@@ -305,6 +339,7 @@ function StopAll()
     if (LSM303D.IsAvailable()) LSM303D.Stop();
     if (CAP1166.IsAvailable()) CAP1166.Stop();
     if (BMP280.IsAvailable()) BMP280.Stop();
+    if (ADT7410.IsAvailable()) ADT7410.Stop();
     if (ADS1015.IsAvailable()) ADS1015.Stop();
 
     if (IS31FL3731.IsAvailable()) IS31FL3731.Stop();
