@@ -6,6 +6,7 @@
 const i2c = require('i2c-bus'); // -> https://github.com/fivdi/i2c-bus
 
 const ADS1015 = require('./ADS1015.js');
+const ADT7410 = require('./ADT7410.js');
 const BMP280 = require('./BMP280.js');
 const CAP1166 = require('./CAP1166.js');
 const IS31FL3731 = require('./IS31FL3731.js');
@@ -55,6 +56,7 @@ module.exports = {
 // I2C addresses (as of Jan 2019) of select Adafruit Sensor Breakouts for reference
 // -----------------------------------------------------------------------------------
 
+// * Adafruit ADT7410 High Accuracy Temperature Sensor Breakout -> Configurable 0x48-0x4b via address pins
 // * Adafruit MCP9808 High Accuracy Temperature Sensor Breakout -> Configurable 0x18-0x1f via address pins
 // * Adafruit VEML6075 UVA UVB and UV Index Sensor Breakout -> 0x10
 
@@ -173,12 +175,30 @@ function Start(outputLogs, showDebug)
 
 				// ====================
 
+				case 0x48: // ##### Analog Devices ADT7410 #####
+						   // -> Adafruit ADT7410 Sensor Breakout (primary address @ pins "00" -> A1/A0 == 0)
+				{
+					if (ADT7410.Identify(I2C_BUS, devices[i]))
+					{
+						console.log("   • \x1b[32mADT7410\x1b[0m high accuracy temperature sensor found at I2C address 0x%s (device %s on bus 1).", devices[i].toString(16), i);
+					}
+					break;
+				}
+
+				// ====================
+
 				case 0x49: // ##### Texas Instruments ADS1015 #####
 						   // -> Pimoroni Enviro pHAT
+						   // ##### Analog Devices ADT7410 #####
+						   // -> Adafruit ADT7410 Sensor Breakout (secondary address @ pins "01" -> A1 == 0, A0 == 1)
 				{
 					if (ADS1015.Identify(I2C_BUS, devices[i]))
 					{
 						console.log("   • \x1b[32mADS1015\x1b[0m 4-channel 5V tolerant 12-bit analog to digital sensor found at I2C address 0x%s (device %s on bus 1).", devices[i].toString(16), i);
+					}
+					else if (ADT7410.Identify(I2C_BUS, devices[i]))
+					{
+						console.log("   • \x1b[32mADT7410\x1b[0m high accuracy temperature sensor found at I2C address 0x%s (device %s on bus 1).", devices[i].toString(16), i);
 					}
 					break;
 				}

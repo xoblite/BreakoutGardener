@@ -6,6 +6,7 @@
 const http = require('http');
 
 const ADS1015 = require('./ADS1015.js');
+const ADT7410 = require('./ADT7410.js');
 const BMP280 = require('./BMP280.js');
 const CAP1166 = require('./CAP1166.js');
 const DS18B20 = require('./DS18B20.js');
@@ -102,7 +103,7 @@ function Start(port, version, logs, debug)
         }
         else
         {
-            if (outputLogs) console.log("Breakout Gardener -> DASHBOARD -> HTTP %s %s -> Serving up dashboard web page on port %s...", request.method, request.url, dashboardPort);
+            if (showDebug) console.log("Breakout Gardener -> DASHBOARD -> HTTP %s %s -> Serving up dashboard web page on port %s...", request.method, request.url, dashboardPort);
 
             response.writeHead(200, {'Content-Type': 'text/html'});
 //            response.write("<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n<title>Breakout Gardener</title>\n<meta charset=\"UTF-8\">\n<meta http-equiv=\"refresh\" content=\"5\" >\n<style>");
@@ -128,8 +129,8 @@ function Start(port, version, logs, debug)
             var cpuLoad = SYSTEM.GetCPULoad();
             var cpuTemperature = SYSTEM.GetCPUTemperature();
             var memoryUsageInPercent = SYSTEM.GetMemoryUsageInPercent();
-            if (cpuLoad.Cores.length == 4) response.write("<tr><td colspan=\"10\" class=\"system\"><b><u>SYSTEM</u></b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;CPU load per core:&nbsp;&nbsp;&nbsp;&#x2460; " + cpuLoad.Cores[0].toFixed(1) + "%&nbsp;&nbsp;&nbsp;&#x2461; " + cpuLoad.Cores[1].toFixed(1) + "%&nbsp;&nbsp;&nbsp;&#x2462; " + cpuLoad.Cores[2].toFixed(1) + "%&nbsp;&nbsp;&nbsp;&#x2463; " + cpuLoad.Cores[3].toFixed(1) + "%&nbsp;&nbsp;&nbsp;&#x2502;&nbsp;&nbsp;&nbsp;Across all cores:&nbsp;&nbsp;&nbsp;" + cpuLoad.AllCores.toFixed(0) + "%&nbsp;&nbsp;&nbsp;&#x2502;&nbsp;&nbsp;&nbsp;CPU temperature:&nbsp;&nbsp;&nbsp;" + cpuTemperature.toFixed(1) + " °C&nbsp;&nbsp;&nbsp;&#x2502;&nbsp;&nbsp;&nbsp;Memory usage:&nbsp;&nbsp;&nbsp;" + memoryUsageInPercent.toFixed(0) + "%</td></tr>\n<tr>\n");
-            else response.write("<tr><td colspan=\"10\" class=\"system\"><b><u>SYSTEM</u></b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;CPU load across all cores:&nbsp;&nbsp;&nbsp;" + cpuLoad.AllCores.toFixed(0) + "%&nbsp;&nbsp;&nbsp;&#x2502;&nbsp;&nbsp;&nbsp;CPU temperature:&nbsp;&nbsp;&nbsp;" + cpuTemperature.toFixed(1) + " °C&nbsp;&nbsp;&nbsp;&#x2502;&nbsp;&nbsp;&nbsp;Memory usage:&nbsp;&nbsp;&nbsp;" + memoryUsageInPercent.toFixed(0) + "%</td></tr>\n<tr>\n");
+            if (cpuLoad.Cores.length == 4) response.write("<tr><td colspan=\"11\" class=\"system\"><b><u>SYSTEM</u></b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;CPU load per core:&nbsp;&nbsp;&nbsp;&#x2460; " + cpuLoad.Cores[0].toFixed(1) + "%&nbsp;&nbsp;&nbsp;&#x2461; " + cpuLoad.Cores[1].toFixed(1) + "%&nbsp;&nbsp;&nbsp;&#x2462; " + cpuLoad.Cores[2].toFixed(1) + "%&nbsp;&nbsp;&nbsp;&#x2463; " + cpuLoad.Cores[3].toFixed(1) + "%&nbsp;&nbsp;&nbsp;&#x2502;&nbsp;&nbsp;&nbsp;Across all cores:&nbsp;&nbsp;&nbsp;" + cpuLoad.AllCores.toFixed(0) + "%&nbsp;&nbsp;&nbsp;&#x2502;&nbsp;&nbsp;&nbsp;CPU temperature:&nbsp;&nbsp;&nbsp;" + cpuTemperature.toFixed(1) + " °C&nbsp;&nbsp;&nbsp;&#x2502;&nbsp;&nbsp;&nbsp;Memory usage:&nbsp;&nbsp;&nbsp;" + memoryUsageInPercent.toFixed(0) + "%</td></tr>\n<tr>\n");
+            else response.write("<tr><td colspan=\"11\" class=\"system\"><b><u>SYSTEM</u></b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;CPU load across all cores:&nbsp;&nbsp;&nbsp;" + cpuLoad.AllCores.toFixed(0) + "%&nbsp;&nbsp;&nbsp;&#x2502;&nbsp;&nbsp;&nbsp;CPU temperature:&nbsp;&nbsp;&nbsp;" + cpuTemperature.toFixed(1) + " °C&nbsp;&nbsp;&nbsp;&#x2502;&nbsp;&nbsp;&nbsp;Memory usage:&nbsp;&nbsp;&nbsp;" + memoryUsageInPercent.toFixed(0) + "%</td></tr>\n<tr>\n");
 
             // ====================
 
@@ -140,6 +141,15 @@ function Start(port, version, logs, debug)
             }
             else response.write("   <td class=\"disabled\"><b><u>ADS1015</u></b>");
 
+            // ====================
+
+            if (ADT7410.IsAvailable())
+            {
+                var adt7410 = ADT7410.Get();
+                response.write("\n   <td><b><u>ADT7410</u></b><br><br>Temperature:<br>" + adt7410[0].toFixed(1) + " °C</td>");
+            }
+            else response.write("   <td class=\"disabled\"><b><u>ADT7410</u></b>");
+            
             // ====================
 
             if (BMP280.IsAvailable())
@@ -279,6 +289,8 @@ function Start(port, version, logs, debug)
             response.end();
         }
     }).listen(dashboardPort);
+
+    webServerInstance.keepAliveTimeout = 3000; // Set the socket keep-alive timeout to 3 seconds (should be more than enough for our usage pattern)
 }
 
 function Stop() { webServerInstance.close(); }
