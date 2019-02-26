@@ -35,6 +35,8 @@ var outputLogs = false, showDebug = false;
 
 function Identify(bus, address)
 {
+	if (I2C_ADDRESS_BMP280 > 0) return false;
+
 	// Identify using the part number ID (0x58) of the BMP280 device...
 	var deviceID = bus.readByteSync(address, 0xd0);
 	if (deviceID == 0x58)

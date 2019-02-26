@@ -40,6 +40,8 @@ var outputLogs = false, showDebug = false;
 
 function Identify(bus, address)
 {
+	if (I2C_ADDRESS_IS31FL3731 > 0) return false;
+
 	// Note: There doesn't seem to be a way to identify the
 	// IS31FL3731 device unfortunately [?], so here we go...
 	I2C_BUS = bus;

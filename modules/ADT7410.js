@@ -33,6 +33,8 @@ var outputLogs = false, showDebug = false;
 
 function Identify(bus, address)
 {
+	if (I2C_ADDRESS_ADT7410 > 0) return false;
+
 	// Identify using the manufacturer ID (0x19) of the ADT7410 device...
 	var manufacturerID = (bus.readByteSync(address, 0x0b) & 0b00011111);
 	if (manufacturerID == 0x19)

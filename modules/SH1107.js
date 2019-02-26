@@ -46,6 +46,8 @@ var outputLogs = false, showDebug = false;
 
 function Identify(bus, address)
 {
+	if (I2C_ADDRESS_SH1107 > 0) return false;
+
     // Identify using the information ID (0x07) of the SH1107 device...
     var deviceID = (bus.readByteSync(address, 0x00) & 0xf);
     if (deviceID == 0x07)

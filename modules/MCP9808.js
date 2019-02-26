@@ -33,6 +33,8 @@ var outputLogs = false, showDebug = false;
 
 function Identify(bus, address)
 {
+	if (I2C_ADDRESS_MCP9808 > 0) return false;
+
 	// Identify using the manufacturer (0x5400 swapped LSB/MSB)
 	// and device (0x04 with swapped LSB/MSB) IDs of the MCP9808 device...
 	var manufacturerID = bus.readWordSync(address, 0x06);

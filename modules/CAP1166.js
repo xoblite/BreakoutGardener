@@ -34,6 +34,8 @@ var outputLogs = false, showDebug = false;
 
 function Identify(bus, address)
 {
+	if (I2C_ADDRESS_CAP1166 > 0) return false;
+
 	// Identify using the manufacturer (0x5d) and product (0x51) IDs of the CAP1166 device...
 	var manufacturerID = bus.readByteSync(address, 0xfe);
 	var deviceID = bus.readByteSync(address, 0xfd);

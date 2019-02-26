@@ -36,6 +36,8 @@ var outputLogs = false, showDebug = false;
 
 function Identify(bus, address)
 {
+	if (I2C_ADDRESS_TCS3472 > 0) return false;
+
 	// Identify using the part number ID (0x44 or 0x4d) of the TCS3472 device...
 	var deviceID = bus.readByteSync(address, 0x92);
 	if (deviceID == 0x44 || deviceID == 0x4d) // 0x44 -> TCS34725, 0x4d -> TCS34727

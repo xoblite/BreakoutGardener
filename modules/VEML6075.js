@@ -21,7 +21,7 @@ module.exports = {
 
 // ----------------------------------------------------------------------------------------
 // === Vishay Semiconductors VEML6075 UVA and UVB Light Sensor ===
-// * Product Page -> 
+// * Product Page -> https://www.vishay.com/ppg?84304
 // * Datasheet -> https://www.vishay.com/docs/84304/veml6075.pdf
 // * Application Note -> https://www.vishay.com/docs/84339/designingveml6075.pdf
 // * Adafruit Learn -> https://learn.adafruit.com/adafruit-veml6075-uva-uvb-uv-index-sensor/
@@ -35,6 +35,8 @@ var outputLogs = false, showDebug = false;
 
 function Identify(bus, address)
 {
+	if (I2C_ADDRESS_VEML6075 > 0) return false;
+
 	// Identify using the device ID (0x26) of the VEML6075 device...
 	var deviceID = bus.readWordSync(address, 0x0c);
 	if ((deviceID & 0xff) == 0x26)
@@ -62,12 +64,7 @@ function Start(logs, debug)
 
 	// Configure the device...
 	I2C_BUS.writeByteSync(I2C_ADDRESS_VEML6075, 0x00, 0b00000001); // Power off ("shut down")
-////	I2C_BUS.writeByteSync(I2C_ADDRESS_VEML6075, 0x00, 0b00011011); // Triggered ("active force") mode, 100 ms integration time, high dynamic range
-////	I2C_BUS.writeByteSync(I2C_ADDRESS_VEML6075, 0x00, 0b00011010); // Power on
-	I2C_BUS.writeByteSync(I2C_ADDRESS_VEML6075, 0x00, 0b00010011); // Triggered ("active force") mode, 100 ms integration time, normal dynamic range
-	I2C_BUS.writeByteSync(I2C_ADDRESS_VEML6075, 0x00, 0b00010010); // Power on
-//	I2C_BUS.writeByteSync(I2C_ADDRESS_VEML6075, 0x00, 0b00010001); // Normal (continuous) mode, 100 ms integration time, normal dynamic range
-//	I2C_BUS.writeByteSync(I2C_ADDRESS_VEML6075, 0x00, 0b00010000); // Power on
+	I2C_BUS.writeByteSync(I2C_ADDRESS_VEML6075, 0x00, 0b00000000); // Power on, normal (continuous) mode, 50 ms integration time, normal dynamic range
 }
 
 function Stop() { return; }
@@ -85,9 +82,6 @@ const uvb_resp = 0.002591; // UVB response
 
 function Get()
 {
-	// Trigger sensor measurement...
-	I2C_BUS.writeByteSync(I2C_ADDRESS_VEML6075, 0x00, 0b00010110);
-
 	var uva = I2C_BUS.readWordSync(I2C_ADDRESS_VEML6075, 0x07); // Uncalibrated UVA
 	var uvb = I2C_BUS.readWordSync(I2C_ADDRESS_VEML6075, 0x09); // Uncalibrated UVB
 	var uvcomp1 = I2C_BUS.readWordSync(I2C_ADDRESS_VEML6075, 0x0a); // UV compensation value 1
@@ -97,9 +91,9 @@ function Get()
 	// lighting you may get VERY LOW or even NEGATIVE values." ===
 
 	var uva_adjusted = Math.round(uva - (uva_a_coef * uvcomp1) - (uva_b_coef * uvcomp2));
-	// if (uva_adjusted < 0) uva_adjusted = 0; // Allowing negative UVA values for now
+	// if (uva_adjusted < 0) uva_adjusted = 0; // Allowing negative UVA values to be displayed (for now at least)
 	var uvb_adjusted = Math.round(uvb - (uvb_c_coef * uvcomp1) - (uvb_d_coef * uvcomp2));
-	// if (uvb_adjusted < 0) uvb_adjusted = 0; // Allowing negative UVB values for now
+	// if (uvb_adjusted < 0) uvb_adjusted = 0; // Allowing negative UVB values to be displayed (for now at least)
 
 	var uv_index = ((uva_adjusted * uva_resp) + (uvb_adjusted * uvb_resp)) / 2;
 	if (uv_index < 0) uv_index = 0;
@@ -118,10 +112,10 @@ function Log()
 	if (outputLogs)
 	{
 		var tempString = "Breakout Gardener -> VEML6075 -> UVA \x1b[100;97m " + data[0].toFixed(0) + " \x1b[0m / UVB \x1b[100;97m " + data[1].toFixed(0) + " \x1b[0m / UV Index \x1b[107;30m " + data[2].toFixed(1);
-		if (data[2] > 10.5) tempString += " (Extreme) \x1b[0m.";
-		else if (data[2] > 7.5) tempString += " (Very High) \x1b[0m.";
-		else if (data[2] > 5.5) tempString += " (High) \x1b[0m.";
-		else if (data[2] > 2.5) tempString += " (Moderate) \x1b[0m.";
+		if (data[2] > 10.9) tempString += " (Extreme) \x1b[0m.";
+		else if (data[2] > 7.9) tempString += " (Very High) \x1b[0m.";
+		else if (data[2] > 5.9) tempString += " (High) \x1b[0m.";
+		else if (data[2] > 2.9) tempString += " (Moderate) \x1b[0m.";
 		else tempString += " (Low) \x1b[0m.";
 		console.log(tempString);
 	}
@@ -146,14 +140,15 @@ function Display(refreshAll)
 			SH1107.DrawTextSmall("UV (VEML6075)", 21, 16, false);
 		}
 
-		SH1107.DrawTextSmall(data[0].toFixed(0), 60, 0, true);
-		SH1107.DrawTextSmall(data[1].toFixed(0), 60, 2, true);
+		SH1107.DrawTextSmall(data[0].toFixed(0), 60, 0, true); // UVA value
+		SH1107.DrawTextSmall(data[1].toFixed(0), 60, 2, true); // UVB value
 
-		SH1107.DrawTextMedium(data[2].toFixed(1), 4, 9, true);
-		if (data[2] > 10.5) SH1107.DrawTextSmall("EXTREME", 60, 10, true);
-		else if (data[2] > 7.5) SH1107.DrawTextSmall("VERY HIGH", 60, 10, true);
-		else if (data[2] > 5.5) SH1107.DrawTextSmall("HIGH", 60, 10, true);
-		else if (data[2] > 2.5) SH1107.DrawTextSmall("MODERATE", 60, 10, true);
+		SH1107.DrawTextMedium(data[2].toFixed(1), 4, 9, true); // UV index value (x.x)
+
+		if (data[2] > 10.9) SH1107.DrawTextSmall("EXTREME", 60, 10, true);
+		else if (data[2] > 7.9) SH1107.DrawTextSmall("VERY HIGH", 60, 10, true);
+		else if (data[2] > 5.9) SH1107.DrawTextSmall("HIGH", 60, 10, true);
+		else if (data[2] > 2.9) SH1107.DrawTextSmall("MODERATE", 60, 10, true);
 		else SH1107.DrawTextSmall("LOW", 60, 10, true);
 
 		if (refreshAll) SH1107.On();

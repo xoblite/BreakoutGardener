@@ -35,6 +35,8 @@ var outputLogs = false, showDebug = false;
 
 function Identify(bus, address)
 {
+	if (I2C_ADDRESS_ADS1015 > 0) return false;
+
 	// Note: There doesn't seem to be a way to identify the
 	// ADS1015 device unfortunately [?], so here we go...
 	I2C_BUS = bus;

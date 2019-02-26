@@ -24,7 +24,7 @@ module.exports = {
 // ================================================================================
 
 // -----------------------------------------------------------------------------------
-// I2C addresses (as of Jan 2019) of some Pimoroni Breakouts and (p)HATs for reference
+// I2C addresses (as of Feb 2019) of some Pimoroni Breakouts and (p)HATs for reference
 // -----------------------------------------------------------------------------------
 
 // Breakouts:
@@ -35,6 +35,7 @@ module.exports = {
 // * IS31FL3731 5x5 RGB Matrix Breakout -> 0x74 (default) or 0x77
 // * LSM303D 6DoF Motion Sensor Breakout -> 0x1d (default) or 0x1E
 // * LTR-559 Light & Proximity Sensor Breakout -> 0x23
+// * MAX30105 High-Sensitivity Optical ("Smoke Detection") Sensor Breakout -> 0x57
 // * MCP9600 Thermocouple Amplifier Breakout -> 0x38 (default?) or 0x39
 // * MLX90640 Thermal Camera Breakout -> 0x33
 // * SH1107 1.12" Mono OLED (128x128, white/black) Breakout -> 0x3c (default) or 0x3d
@@ -53,12 +54,13 @@ module.exports = {
 //   (controlling 6 capacitive touch buttons + 6 bright white under-mounted LEDs)
 
 // -----------------------------------------------------------------------------------
-// I2C addresses (as of Jan 2019) of select Adafruit Sensor Breakouts for reference
+// I2C addresses (as of Feb 2019) of select Adafruit Sensor Breakouts for reference
 // -----------------------------------------------------------------------------------
 
-// * Adafruit ADT7410 High Accuracy Temperature Sensor Breakout -> Configurable 0x48-0x4b via address pins
-// * Adafruit MCP9808 High Accuracy Temperature Sensor Breakout -> Configurable 0x18-0x1f via address pins
-// * Adafruit VEML6075 UVA UVB and UV Index Sensor Breakout -> 0x10
+// * ADT7410 High Accuracy Temperature Sensor Breakout -> Configurable 0x48-0x4b via address pins
+// * MCP9808 High Accuracy Temperature Sensor Breakout -> Configurable 0x18-0x1f via address pins
+// * SGP30 Indoor Air Quality (TVOC and CO2eq) Gas Sensor Breakout -> 0x58
+// * VEML6075 UVA UVB and UV Index Sensor Breakout -> 0x10
 
 // -----------------------------------------------------------------------------------
 
@@ -187,18 +189,18 @@ function Start(outputLogs, showDebug)
 
 				// ====================
 
-				case 0x49: // ##### Texas Instruments ADS1015 #####
-						   // -> Pimoroni Enviro pHAT
-						   // ##### Analog Devices ADT7410 #####
+				case 0x49: // ##### Analog Devices ADT7410 #####
 						   // -> Adafruit ADT7410 Sensor Breakout (secondary address @ pins "01" -> A1 == 0, A0 == 1)
+						   // ##### Texas Instruments ADS1015 #####
+						   // -> Pimoroni Enviro pHAT
 				{
-					if (ADS1015.Identify(I2C_BUS, devices[i]))
-					{
-						console.log("   • \x1b[32mADS1015\x1b[0m 4-channel 5V tolerant 12-bit analog to digital sensor found at I2C address 0x%s (device %s on bus 1).", devices[i].toString(16), i);
-					}
-					else if (ADT7410.Identify(I2C_BUS, devices[i]))
+					if (ADT7410.Identify(I2C_BUS, devices[i]))
 					{
 						console.log("   • \x1b[32mADT7410\x1b[0m high accuracy temperature sensor found at I2C address 0x%s (device %s on bus 1).", devices[i].toString(16), i);
+					}
+					else if (ADS1015.Identify(I2C_BUS, devices[i])) // Nb. Needs to be last since there's no way to identify this device
+					{
+						console.log("   • \x1b[32mADS1015\x1b[0m 4-channel 5V tolerant 12-bit analog to digital sensor found at I2C address 0x%s (device %s on bus 1).", devices[i].toString(16), i);
 					}
 					break;
 				}

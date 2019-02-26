@@ -37,6 +37,8 @@ var outputLogs = false, showDebug = false;
 
 function Identify(bus, address)
 {
+	if (I2C_ADDRESS_LSM303D > 0) return false;
+
 	// Identify using the product ID (0x49) of the LSM303D device...
 	// (by the way, note that the device on the Pimoroni Enviro pHAT is the older (today obsolete) *LSM303D* specifically,
 	// and that later LSM303* variants from STMicroelectronics may differ significantly in terms of I2C addressing etc.)
