@@ -3,6 +3,11 @@
 // (c) 2018-2019 Karl-Henrik Henriksson - breakouts*xoblite.net - http://breakouts.xoblite.net/
 // ============================================================================================
 
+------------------------------------------------------------- Version 19.2.26 (RC1c) ----------
+
+- Finally some nice weather with sufficient sunlight to test and adjust the VEML6075 module :)
+- Minor refinements to the I2C device identification functionality
+
 -------------------------------------------------------------- Version 19.2.8 (RC1b) ----------
 
 - Added preliminary support for the Analog Devices ADT7410 Digital Temperature Sensor

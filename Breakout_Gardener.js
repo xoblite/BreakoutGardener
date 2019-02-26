@@ -5,7 +5,7 @@
 // ============================================================================================
 
 const softwareName = "Breakout Gardener";
-const softwareVersion = "19.2.8";
+const softwareVersion = "19.2.26";
 
 const I2C = require('./modules/I2C.js'); // Requires the i2c-bus library -> https://github.com/fivdi/i2c-bus
 
