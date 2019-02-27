@@ -19,7 +19,7 @@ Breakout Gardener currently supports the following devices and sensors (I2C unle
 - **TCS3472**: ams TCS3472 Color Light Sensor ([example](https://shop.pimoroni.com/products/enviro-phat))
 - **VEML6075**: Vishay Semiconductors VEML6075 UVA and UVB Light Sensor ([example](https://www.adafruit.com/product/3964))
 
-It also supports additional display modes through its **SYSTEM**, **CLOCK** and **KOMPIS** modules, data [exposure](https://prometheus.io/) (and related [visualization](https://grafana.com/)) through its **PROMETHEUS** module, as well as a HTML5/CSS3 browser **DASHBOARD** module (see image above) that provides an overview of the current status and readings of all sensors and devices available on the system (nb. the "Shop" button is there just to support the tinkering community's favourite suppliers; [Pimoroni (UK)](https://pimoroni.com/) and [Adafruit Industries (US)](https://www.adafruit.com/) (no affiliation to either, I just like their products and geeky dedication to the cause :wink:)).
+It also supports additional display modes through its **SYSTEM**, **CLOCK** and **KOMPIS** modules, data [exposure](https://prometheus.io/) and related [visualization](https://grafana.com/) through its **PROMETHEUS** module, as well as a HTML5/CSS3 browser **DASHBOARD** module (see image above) that provides an overview of the current status and readings of all sensors and devices available on the system (nb. the "Shop" button is there just to support the tinkering community's favourite suppliers; [Pimoroni (UK)](https://pimoroni.com/) and [Adafruit Industries (US)](https://www.adafruit.com/) (no affiliation to either, I just like their products and geeky dedication to the cause :wink:)).
 
 Anyway, without further ado:
 
