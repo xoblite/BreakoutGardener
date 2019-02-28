@@ -101,7 +101,7 @@ function Get()
 	I2C_BUS.readI2cBlockSync(I2C_ADDRESS_BMP280, 0xf7, 6, readBuffer);
 
 	// Apply temperature compensation formula according to the BMP280 datasheet... (yes, this is fugly!)
-	var readTemp = (readBuffer.readInt8(3) << 12) + (readBuffer.readUInt8(4) << 4) + (readBuffer.readUInt8(5) >> 4); // MSB 8 bits, LSB 8 bits, XLSB 4 bits
+	var readTemp = (readBuffer.readUInt8(3) << 12) + (readBuffer.readUInt8(4) << 4) + (readBuffer.readUInt8(5) >> 4); // MSB 8 bits, LSB 8 bits, XLSB 4 bits
 	var var1 = ((readTemp / 16384) - (bmp280DigT1 / 1024)) * bmp280DigT2;
 	var var2 = ((readTemp / 131072) - (bmp280DigT1 / 8192)) * ((readTemp / 131072) - (bmp280DigT1 / 8192)) * bmp280DigT3;
 	var fineTemp = (var1 + var2);
