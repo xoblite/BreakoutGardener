@@ -3,6 +3,12 @@
 // (c) 2018-2019 Karl-Henrik Henriksson - breakouts*xoblite.net - http://breakouts.xoblite.net/
 // ============================================================================================
 
+------------------------------------------------------------- Version 19.2.28 (RC1d) ----------
+
+- Fixed a typo in the BMP280 module which caused wrapped temperature readings above ~26.4°C
+  (and, since the pressure calculations in turn include the temperature as an input value,
+  the pressure readings were also affected when this happened)
+
 ------------------------------------------------------------- Version 19.2.26 (RC1c) ----------
 
 - Finally some nice weather with sufficient sunlight to test and adjust the VEML6075 module :)
