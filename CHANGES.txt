@@ -3,25 +3,69 @@
 // (c) 2018-2019 Karl-Henrik Henriksson - breakouts*xoblite.net - http://breakouts.xoblite.net/
 // ============================================================================================
 
-------------------------------------------------------------- Version 19.2.28 (RC1d) ----------
+------------------------------------------------------------- Version 19.10.4 (R2B) ----------
+
+- Added support for the Sensirion SHT31D Humidity & Temperature Sensor
+- Added support for the Texas Instruments DRV2605 based Pimoroni Linear Actuator Haptic Breakout
+  * ...including some buzzing (pun intended) new effects for a few other applicable modules! =]
+    (e.g. CLOCK when the hour changes, SGP30 when air quality deteriorates to IAQ level 3 ("Moderate")
+     or above, VEML6075 when UV radiation increases to index level 3 ("High") or above...)
+- Added support for the KEBA KeContact P30 series wallbox charging station (via UDP based API)
+  * Yup, now you can watch your electric car getting fed in the same place as all your other sensors! ;)
+  * ...and if the Haptic Breakout (see above) is installed, it will buzz when charging is finished! :D
+- Changed most bus wait states from somewhat unpredictable/async setTimeout() variants to maybe less elegant
+  but also more predictable performance.now based busy loops (nb. doesn't matter much in our case anyway)
+
+- With 20 modules now available, the default DASHBOARD display mode is now to use multiple rows
+  of 10 modules each (nb. this is configurable from the top of Breakout_Gardener.js though; single row
+  still looks quite cool on ultra-wide desktop displays but is much less practical on smaller displays)
+
+------------------------------------------------------------- Version 19.5.30 (R2A) ----------
+
+- Added support for the Sensirion SGP30 Indoor Air Quality (TVOC and CO2eq) Gas Sensor
+- Added support for the Vishay Semiconductors VCNL4010 Proximity/Light Sensor
+- Added support for the Analog Devices ADXL343 Triple-Axis Accelerometer
+- Added support for the IS31FL3731 based Pimoroni 11x7 White LED Matrix Breakout
+  * ...including matching new/complementary display modes for all other applicable modules! 8)
+- Added preliminary support for the Pimoroni Trackball Breakout (nb. this requires I2C bus speed at max *250* kHz!)
+  * Left/Up -> Previous display mode. * Right/Down -> Next display mode.
+  * Short Press Click -> Turn displays and Auto-Rotate on. * Long press click -> Turn displays off.
+  * Known issues/caveats: In my experience, the clock-stretching Trackball does not play well with the SGP30,
+    but more testing needed (I will then update this .txt accordingly) and your mileage may vary... ;)
+- Improved support for the Analog Devices ADT7410 Digital Temperature Sensor (misc bug fixes)
+
+- Changed the BMP280 module's SH1107 display mode to provide equivalent/more focus to air pressure
+  (also because it is in my experience not a particularly good thermometer; hence the BME series?)
+- Changed all SH1107 display mode "title bars" to reflect only the name of the module/device (less cluttered)
+- Changed the order of the display modes to make the progression feel a bit more natural... :)
+  (currently being ~ clock->cpu%->temperature(s)->pressure->air->UV/light->motion->analog->system->friend,
+  but this could of course be adjusted again in the future due to e.g. new types of sensors/modules)
+
+- Added the first BG "proxy" module - SGP30 - to interface with Apple HomeKit through HAP-NodeJS! :D
+
+- Added a "Visualize" (-> open Grafana [host:3000] in a new window/tab) button to the DASHBOARD
+  (nb. this assumes that you have Prometheus and Grafana installed on the same host as BG itself)
+- Added a timestamp to the DASHBOARD (i.e. when last refreshed, fetched from the CLOCK module)
+
+------------------------------------------------------------- Version 19.2.28 (RC1D) ----------
 
 - Fixed a typo in the BMP280 module which caused wrapped temperature readings above ~26.4°C
   (and, since the pressure calculations in turn include the temperature as an input value,
   the pressure readings were also affected when this happened)
 
-------------------------------------------------------------- Version 19.2.26 (RC1c) ----------
+------------------------------------------------------------- Version 19.2.26 (RC1C) ----------
 
 - Finally some nice weather with sufficient sunlight to test and adjust the VEML6075 module :)
 - Minor refinements to the I2C device identification functionality
 
--------------------------------------------------------------- Version 19.2.8 (RC1b) ----------
+-------------------------------------------------------------- Version 19.2.8 (RC1B) ----------
 
 - Added preliminary support for the Analog Devices ADT7410 Digital Temperature Sensor
   (based purely on the information in the datasheet; still to be tested with a real device)
 - Added server socket keep-alive timeouts to the DASHBOARD and PROMETHEUS modules
 - Fixed a couple of missing device availability checks in auto-rotating display mode
 
--------------------------------------------------------------- Version 19.2.5 (RC1a) ----------
+-------------------------------------------------------------- Version 19.2.5 (RC1A) ----------
 
 - First official preview release
 
