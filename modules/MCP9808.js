@@ -5,7 +5,8 @@
 
 const i2c = require('i2c-bus'); // -> https://github.com/fivdi/i2c-bus
 const SH1107 = require('./SH1107.js');
-const IS31FL3731 = require('./IS31FL3731.js');
+const IS31FL3731_RGB = require('./IS31FL3731_RGB.js');
+const IS31FL3731_WHITE = require('./IS31FL3731_WHITE.js');
 
 module.exports = {
 	Identify: Identify,
@@ -96,7 +97,7 @@ function Get()
 
 function Log()
 {
-	console.log("Breakout Gardener -> MCP9808 -> Temperature \x1b[97;44m %s °C \x1b[0m.", data[0].toFixed(1));
+    if (outputLogs) console.log("Breakout Gardener -> MCP9808 -> Temperature \x1b[97;44m %s °C \x1b[0m.", data[0].toFixed(1));
 }
 
 // ====================
@@ -112,7 +113,7 @@ function Display(refreshAll)
 			SH1107.Off();
 			SH1107.Clear();
 			SH1107.DrawSeparatorLine();
-			SH1107.DrawTextSmall("NEARBY (MCP9808)", 6, 16, false);
+			SH1107.DrawTextSmall("MCP9808", 37, 16, false);
 		}
 
 		// Display the temperature rounded to the nearest integer...
@@ -133,7 +134,7 @@ function Display(refreshAll)
 
 	// ====================
 
-	if (IS31FL3731.IsAvailable())
+	if (IS31FL3731_RGB.IsAvailable())
 	{
 		const icon = [0x000000, 0x000000, 0x000000, 0x000000, 0x000000,
 					  0x000000, 0x000000, 0x000000, 0x000000, 0x000000,
@@ -148,7 +149,14 @@ function Display(refreshAll)
 		else if (data[0] > 17) icon[15] = icon[16] = icon[17] = icon[18] = icon[19] = 0x00aaaa; // Cyan 17-19 °C
 		else icon[20] = icon[21] = icon[22] = icon[23] = icon[24] = 0x0000aa; // Blue < 17 °C
 
-		IS31FL3731.Display(icon);
+		IS31FL3731_RGB.Display(icon);
+	}
+
+	// ====================
+
+	if (IS31FL3731_WHITE.IsAvailable())
+	{
+		IS31FL3731_WHITE.DrawString(Math.round(data[0]).toString());
 	}
 
 	// ====================

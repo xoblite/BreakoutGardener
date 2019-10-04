@@ -7,12 +7,17 @@ const http = require('http');
 
 const ADS1015 = require('./ADS1015.js');
 const ADT7410 = require('./ADT7410.js');
+const ADXL343 = require('./ADXL343.js');
 const BMP280 = require('./BMP280.js');
 const DS18B20 = require('./DS18B20.js');
+const KEBA_P30 = require('./KEBA_P30.js');
 const LSM303D = require('./LSM303D.js');
 const MCP9808 = require('./MCP9808.js');
+const SGP30 = require('./SGP30.js');
+const SHT31D = require('./SHT31D.js');
 const SYSTEM = require('./System.js');
 const TCS3472 = require('./TCS3472.js');
+const VCNL4010 = require('./VCNL4010.js');
 const VEML6075 = require('./VEML6075.js');
 
 module.exports = {
@@ -75,6 +80,20 @@ function Start(port, logs, debug)
 
 			// ====================
 
+			if (ADXL343.IsAvailable())
+			{
+				var adxl343 = ADXL343.Get();
+				kv = 'adxl343_accelerometer_x ' + adxl343[3].toFixed(2) + '\n';
+				kv += 'adxl343_accelerometer_y ' + adxl343[4].toFixed(2) + '\n';
+				kv += 'adxl343_accelerometer_z ' + adxl343[5].toFixed(2) + '\n';
+				kv += 'adxl343_roll ' + adxl343[6].toFixed(0) + '\n';
+				kv += 'adxl343_pitch ' + adxl343[7].toFixed(0) + '\n';
+				kv += 'adxl343_taps ' + adxl343[8] + '\n';
+				response.write(kv);
+			}
+
+			// ====================
+
 			if (BMP280.IsAvailable())
 			{
 				var bmp280 = BMP280.Get();
@@ -95,7 +114,25 @@ function Start(port, logs, debug)
 					kv += 'ds18b20_temperature_' + (n+1) + ' ' + ds18b20[n] + '\n';
 				}
 				response.write(kv);
-		}
+            }
+            
+			// ====================
+
+			if (KEBA_P30.IsAvailable())
+			{
+				var kebap30 = KEBA_P30.Get();
+				kv = 'keba_p30_state ' + kebap30[0] + '\n';
+				kv += 'keba_p30_power ' + kebap30[1] + '\n';
+				kv += 'keba_p30_power_percentage_of_maximum ' + kebap30[2] + '\n';
+				kv += 'keba_p30_energy_transferred ' + kebap30[3] + '\n';
+				kv += 'keba_p30_u1 ' + kebap30[4] + '\n';
+				kv += 'keba_p30_u2 ' + kebap30[5] + '\n';
+				kv += 'keba_p30_u3 ' + kebap30[6] + '\n';
+				kv += 'keba_p30_i1 ' + kebap30[7] + '\n';
+				kv += 'keba_p30_i2 ' + kebap30[8] + '\n';
+				kv += 'keba_p30_i3 ' + kebap30[9] + '\n';
+				response.write(kv);
+			}
 
 			// ====================
 
@@ -125,6 +162,29 @@ function Start(port, logs, debug)
 
 			// ====================
 
+			if (SGP30.IsAvailable())
+			{
+				var spg30 = SGP30.Get();
+				kv = 'sgp30_tvoc ' + spg30[0] + '\n';
+				kv += 'sgp30_co2eq ' + spg30[1] + '\n';
+				kv += 'sgp30_ethanol ' + spg30[2] + '\n';
+				kv += 'sgp30_hydrogen ' + spg30[3] + '\n';
+				kv += 'sgp30_iaq_level ' + spg30[4] + '\n';
+				response.write(kv);
+            }
+            
+			// ====================
+
+			if (SHT31D.IsAvailable())
+			{
+				var sht31d = SHT31D.Get();
+				kv = 'sht31d_humidity ' + sht31d[0].toFixed(0) + '\n';
+				kv += 'sht31d_temperature ' + sht31d[1].toFixed(1) + '\n';
+				response.write(kv);
+			}
+
+			// ====================
+
 			// SYSTEM (always available)
 			var cpuLoad = SYSTEM.GetCPULoad();
 			var cpuTemperature = SYSTEM.GetCPUTemperature();
@@ -149,6 +209,16 @@ function Start(port, logs, debug)
 				kv += 'tcs3472_red ' + tcs3472[1] + '\n';
 				kv += 'tcs3472_green ' + tcs3472[2] + '\n';
 				kv += 'tcs3472_blue ' + tcs3472[3] + '\n';
+				response.write(kv);
+			}
+
+			// ====================
+
+			if (VCNL4010.IsAvailable())
+			{
+				var vcnl4010 = VCNL4010.Get();
+				kv = 'vcnl4010_lux ' + vcnl4010[0] + '\n';
+				kv += 'vcnl4010_proximity ' + vcnl4010[1] + '\n';
 				response.write(kv);
 			}
 

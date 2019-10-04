@@ -7,8 +7,8 @@ const os = require('os');
 const { performance } = require('perf_hooks');
 const { execSync } = require('child_process');
 const SH1107 = require('./SH1107.js');
-const IS31FL3731 = require('./IS31FL3731.js');
-//function sleep(msecs) { return new Promise(resolve => setTimeout(resolve, msecs)); } // Helper function
+const IS31FL3731_RGB = require('./IS31FL3731_RGB.js');
+const IS31FL3731_WHITE = require('./IS31FL3731_WHITE.js');
 
 module.exports = {
     Start: Start,
@@ -140,24 +140,24 @@ function DisplayLoad(refreshAll)
         {
             SH1107.Off();
             SH1107.Clear();
-            SH1107.DrawTextSmall("CPU LOAD %", 32, 16, false);
+            SH1107.DrawTextSmall("CPU LOAD %", 29, 16, false);
         }
     
         if (cpuLoad.Cores.length == 4)
         {
             SH1107.DrawMeterBar(parseInt(cpuLoad.Cores[0]), 1);
-            SH1107.DrawMeterBar(parseInt(cpuLoad.Cores[1]), 2);
-            SH1107.DrawMeterBar(parseInt(cpuLoad.Cores[2]), 3);
-            SH1107.DrawMeterBar(parseInt(cpuLoad.Cores[3]), 4);
+            SH1107.DrawMeterBar(parseInt(cpuLoad.Cores[1]), 4);
+            SH1107.DrawMeterBar(parseInt(cpuLoad.Cores[2]), 7);
+            SH1107.DrawMeterBar(parseInt(cpuLoad.Cores[3]), 10);
         }
-        else SH1107.DrawMeterBar(cpuLoad.AllCores, 0);
+        else SH1107.DrawMeterBar(cpuLoad.AllCores, 7);
     
         if (refreshAll) SH1107.On();
     }
 
 	// ====================
 
-    if (IS31FL3731.IsAvailable())
+    if (IS31FL3731_RGB.IsAvailable())
     {
 		const icon = [0x000000, 0x000000, 0x000000, 0x000000, 0x000000,
 					  0x000000, 0x000000, 0x000000, 0x000000, 0x000000,
@@ -195,8 +195,42 @@ function DisplayLoad(refreshAll)
         if (cpuLoad.AllCores > 10) icon[20] = 0x00aa00;
         else icon[20] = 0x004400;
 
-		IS31FL3731.Display(icon);
+		IS31FL3731_RGB.Display(icon);
     }
+
+	// ====================
+
+	if (IS31FL3731_WHITE.IsAvailable())
+	{
+        // IS31FL3731_WHITE.DrawString((Math.round(cpuLoad.AllCores).toString() + '%')); // Average CPU load across all cores
+
+        var memoryUsageInPercent = GetMemoryUsageInPercent();
+
+        if (cpuLoad.Cores.length == 4) // Quad core CPU, e.g. Raspberry Pi 3
+        {
+            // Draw load meters for each individual core...
+            for (var n=0; n<cpuLoad.Cores.length; n++) IS31FL3731_WHITE.DrawMeter(cpuLoad.Cores[n], n);
+            // ...clear the row in between...
+            IS31FL3731_WHITE.DrawMeter(255, 4);
+            // ...draw a meter for the average load across all cores...
+//            IS31FL3731_WHITE.DrawMeter(cpuLoad.AllCores, 6);
+            IS31FL3731_WHITE.DrawMeter(cpuLoad.AllCores, 5);
+            // ...and finally a meter showing the relative memory usage...
+            IS31FL3731_WHITE.DrawMeter(memoryUsageInPercent, 6);
+        }
+        else // Single core CPU, e.g. Raspberry Pi Zero, and everything else... (yeah I'm lazy ;] )
+        {
+            // Draw a fatter, vertically centered load meter for the single core...
+            IS31FL3731_WHITE.DrawMeter(255, 0);
+            IS31FL3731_WHITE.DrawMeter(cpuLoad.AllCores, 1);
+            IS31FL3731_WHITE.DrawMeter(cpuLoad.AllCores, 2);
+            IS31FL3731_WHITE.DrawMeter(cpuLoad.AllCores, 3);
+            IS31FL3731_WHITE.DrawMeter(cpuLoad.AllCores, 4);
+            IS31FL3731_WHITE.DrawMeter(255, 5);
+            // ...and a meter showing the relative memory usage...
+            IS31FL3731_WHITE.DrawMeter(memoryUsageInPercent, 6);
+       }
+	}
 
     // ====================
 
@@ -232,7 +266,7 @@ function DisplayInfo(refreshAll)
             SH1107.DrawTextMedium(' CPU', 0, 0, false);
             SH1107.DrawSeparatorLine(7);
             SH1107.DrawTextMedium(' MEMORY', 0, 8, false);
-            SH1107.DrawTextSmall("SYSTEM", 44, 16, false);
+            SH1107.DrawTextSmall("SYSTEM", 41, 16, false);
         }
 
         var tempString = 'AVG LOAD:   ' + cpuLoad.AllCores.toString() + ' %';
@@ -247,7 +281,7 @@ function DisplayInfo(refreshAll)
 
 	// ====================
 
-    if (IS31FL3731.IsAvailable())
+    if (IS31FL3731_RGB.IsAvailable())
     {
 		const icon = [0x000000, 0x000000, 0x000000, 0x000000, 0x000000,
 					  0x000000, 0x000000, 0x000000, 0x000000, 0x000000,
@@ -271,8 +305,23 @@ function DisplayInfo(refreshAll)
             else icon[(n*5)] = 0x001111;
         }
 
-        IS31FL3731.Display(icon);
+        IS31FL3731_RGB.Display(icon);
     }
+
+	// ====================
+
+	if (IS31FL3731_WHITE.IsAvailable())
+	{
+        // PLACEHOLDER: DISPLAY "BG" PICTURE
+        const pictBG = [ 20,20,20,20,20,20,20,20,20,20,20,
+                         20,40,40,40,20,20,20,40,40,20,20,
+                         20,40,20,20,40,20,40,20,20,20,20,
+                         20,40,40,40,20,20,40,20,40,40,20,
+                         20,40,20,20,40,20,40,20,20,40,20,
+                         20,40,40,40,20,20,20,40,40,20,20,
+                         20,20,20,20,20,20,20,20,20,20,20 ];
+        IS31FL3731_WHITE.Display(pictBG);
+	}
 
     // ====================
 

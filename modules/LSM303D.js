@@ -5,7 +5,8 @@
 
 const i2c = require('i2c-bus'); // -> https://github.com/fivdi/i2c-bus
 const SH1107 = require('./SH1107.js');
-const IS31FL3731 = require('./IS31FL3731.js');
+const IS31FL3731_RGB = require('./IS31FL3731_RGB.js');
+const IS31FL3731_WHITE = require('./IS31FL3731_WHITE.js');
 
 module.exports = {
 	Identify: Identify,
@@ -297,9 +298,12 @@ var rollDegrees = 180 * Math.atan(adjAY / Math.sqrt(adjAX*adjAX + adjAZ*adjAZ)) 
 
 function Log()
 {
-	console.log("Breakout Gardener -> LSM303D -> Accelerometer -> X \x1b[97;45m %d \x1b[0m / Y \x1b[97;45m %d \x1b[0m / Z \x1b[97;45m %d \x1b[0m.", data[0], data[1], data[2]);
-	console.log("Breakout Gardener -> LSM303D -> Magnetometer -> X \x1b[97;45m %d \x1b[0m / Y \x1b[97;45m %d \x1b[0m / Z \x1b[97;45m %d \x1b[0m.", data[6], data[7], data[8]);
-	console.log("Breakout Gardener -> LSM303D -> Combined -> Roll \x1b[97;45m %d \x1b[0m / Pitch \x1b[97;45m %d \x1b[0m / Heading \x1b[97;45m %d° \x1b[0m.", data[12].toFixed(0), data[13].toFixed(0), data[14].toFixed(0));
+    if (outputLogs)
+    {
+        console.log("Breakout Gardener -> LSM303D -> Accelerometer -> X %d / Y %d / Z %d.", data[0], data[1], data[2]);
+        console.log("Breakout Gardener -> LSM303D -> Magnetometer -> X %d / Y %d / Z %d.", data[6], data[7], data[8]);
+        console.log("Breakout Gardener -> LSM303D -> Combined -> Roll \x1b[97;45m %d \x1b[0m / Pitch \x1b[97;45m %d \x1b[0m / Heading \x1b[97;45m %d° \x1b[0m.", data[12].toFixed(0), data[13].toFixed(0), data[14].toFixed(0));
+    }
 }
 
 // ====================
@@ -321,13 +325,13 @@ function Display(refreshAll)
 			SH1107.DrawTextSmall('ACCELEROMETER:', 4, 0, false);
 			SH1107.DrawTextSmall('MAGNETOMETER:', 4, 4, false);
 			SH1107.DrawTextSmall('HEADING:', 4, 8, false);
-			SH1107.DrawTextSmall("MOTION (LSM303D)", 11, 16, false);
+			SH1107.DrawTextSmall("LSM303D", 37, 16, false);
 		}
 
 		if (lsm303dDisplayRaw)
 		{
 			// Display raw accelerometer data
-			tempString = ' ' + data[0] + ' ' + data[1] + ' ' + data[2]; // rawAX, rawAY, rawAZ
+			tempString = data[0] + ' ' + data[1] + ' ' + data[2]; // rawAX, rawAY, rawAZ
 /*
 			// NOTE: LEFT OUT DUE TO RISK OF LINE OVERFLOW
 			// (THERE IS ROOM FOR MAXIMUM 16 SMALL SIZE CHARS PER ROW)
@@ -342,7 +346,7 @@ function Display(refreshAll)
 		else
 		{
 			// Display accelerometer values in g (adjusted to scale)
-			tempString = ' ';
+			tempString = '';
 			if (data[3] >= 0) tempString += '+'; // adjAX
 			tempString += data[3].toFixed(2) + ' ';
 			if (data[4] >= 0) tempString += '+'; // adjAY
@@ -350,12 +354,12 @@ function Display(refreshAll)
 			if (data[5] >= 0) tempString += '+'; // adjAZ
 			tempString += data[5].toFixed(2);
 		}
-		SH1107.DrawTextSmall(tempString, 0, 2, true);
+		SH1107.DrawTextSmall(tempString, 4, 2, true);
 
 		if (lsm303dDisplayRaw)
 		{
 			// Display raw magnetometer data
-			tempString = ' ' + data[6] + ' ' + data[7] + ' ' + data[8]; // rawMX, rawMY, rawMZ
+			tempString = data[6] + ' ' + data[7] + ' ' + data[8]; // rawMX, rawMY, rawMZ
 /*
 			// NOTE: LEFT OUT DUE TO RISK OF LINE OVERFLOW
 			// (THERE IS ROOM FOR MAXIMUM 16 SMALL SIZE CHARS PER ROW)
@@ -371,7 +375,7 @@ function Display(refreshAll)
 		else
 		{
 			// Display magnetometer values in gauss (adjusted to scale)
-			tempString = ' ';
+			tempString = '';
 			if (data[9] >= 0) tempString += '+'; // adjMX
 			tempString += data[9].toFixed(2) + ' ';
 			if (data[10] >= 0) tempString += '+'; // adjMY
@@ -379,17 +383,17 @@ function Display(refreshAll)
 			if (data[11] >= 0) tempString += '+'; // adjMZ
 			tempString += data[11].toFixed(2);
 		}
-		SH1107.DrawTextSmall(tempString, 0, 6, true);
+		SH1107.DrawTextSmall(tempString, 4, 6, true);
 
 		tempString = 'R ';
 		if (data[12] >= 0) tempString += '+'; // rollDegrees
-		tempString += data[12].toFixed(0);
-		SH1107.DrawTextSmall(tempString, 88, 10, true);
+		tempString += data[12].toFixed(0) + '*';
+		SH1107.DrawTextSmall(tempString, 84, 10, true);
 		tempString = 'P ';
 		if (data[13] >= 0) tempString += '+'; // pitchDegrees
-		tempString += data[13].toFixed(0);
-		SH1107.DrawTextSmall(tempString, 88, 11, true);
-		tempString = ' ' + data[14].toFixed(0) + ' *   '; // headingDegrees
+		tempString += data[13].toFixed(0) + '*';
+		SH1107.DrawTextSmall(tempString, 84, 11, true);
+		tempString = ' ' + data[14].toFixed(0) + '*   '; // headingDegrees
 		if (data[14] < 100) tempString += '  ';
 		if (data[14] < 10) tempString += '  ';
 		SH1107.DrawTextMedium(tempString, 0, 10, false);
@@ -399,8 +403,10 @@ function Display(refreshAll)
 
 	// ====================
 
-	if (IS31FL3731.IsAvailable())
+	if (IS31FL3731_RGB.IsAvailable())
 	{
+		// Let's draw a simplified attitude indicator (see e.g. https://en.wikipedia.org/wiki/Attitude_indicator ) and compass!
+
 		const icon = [0x000000, 0x000000, 0x000000, 0x000000, 0x000000,
 					  0x000000, 0x000000, 0x000000, 0x000000, 0x000000,
 					  0x000000, 0x000000, 0x000000, 0x000000, 0x000000,
@@ -441,7 +447,23 @@ function Display(refreshAll)
 		else if (hdng > 11) icon[14] = 0xaa0000; // NNE
 		else icon[2] = 0xaa0000;                  // N
 
-		IS31FL3731.Display(icon);
+		IS31FL3731_RGB.Display(icon);
+	}
+
+	// ====================
+
+	if (IS31FL3731_WHITE.IsAvailable())
+	{
+		// Display the rough compass heading...
+		if (hdng <= 23) IS31FL3731_WHITE.DrawString("N");
+		else if (hdng <= 68) IS31FL3731_WHITE.DrawString("NE");
+		else if (hdng <= 113) IS31FL3731_WHITE.DrawString("E");
+		else if (hdng <= 158) IS31FL3731_WHITE.DrawString("SE");
+		else if (hdng <= 203) IS31FL3731_WHITE.DrawString("S");
+		else if (hdng <= 248) IS31FL3731_WHITE.DrawString("SW");
+		else if (hdng <= 293) IS31FL3731_WHITE.DrawString("W");
+		else if (hdng <= 338) IS31FL3731_WHITE.DrawString("NW");
+		else IS31FL3731_WHITE.DrawString("N");
 	}
 
 	// ====================

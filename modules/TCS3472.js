@@ -6,7 +6,8 @@
 const i2c = require('i2c-bus'); // -> https://github.com/fivdi/i2c-bus
 const { execSync } = require('child_process');
 const SH1107 = require('./SH1107.js');
-const IS31FL3731 = require('./IS31FL3731.js');
+const IS31FL3731_RGB = require('./IS31FL3731_RGB.js');
+const IS31FL3731_WHITE = require('./IS31FL3731_WHITE.js');
 
 module.exports = {
 	Identify: Identify,
@@ -80,7 +81,7 @@ function Stop() { return; }
 
 function Get()
 {
-	// if (IS31FL3731.IsAvailable()) IS31FL3731.Clear(); // Clear ("turn off") the display to prevent it from affecting our light readings
+	// if (IS31FL3731_RGB.IsAvailable()) IS31FL3731_RGB.Clear(); // Clear ("turn off") the display to prevent it from affecting our light readings
 
 	// ====================
 
@@ -142,10 +143,13 @@ function Get()
 
 function Log()
 {
-	var tempString = 'Breakout Gardener -> TCS3472 -> Clear \x1b[30;107m ' + data[0].toString() + ' \x1b[0m / Red \x1b[97;41m ' + data[1].toString() + ' \x1b[0m / Green \x1b[97;42m ' + data[2].toString() + ' \x1b[0m / Blue \x1b[97;44m ' + data[3].toString() + ' \x1b[0m.';
-	console.log(tempString);
-	tempString = 'Breakout Gardener -> TCS3472 -> Color temperature \x1b[30;43m ' + data[4].toString() + ' °K \x1b[0m / Lux \x1b[30;107m ' + data[5].toString() + ' \x1b[0m.';
-	console.log(tempString);
+    if (outputLogs)
+    {
+        var tempString = 'Breakout Gardener -> TCS3472 -> Clear \x1b[30;107m ' + data[0].toString() + ' \x1b[0m / Red \x1b[97;41m ' + data[1].toString() + ' \x1b[0m / Green \x1b[97;42m ' + data[2].toString() + ' \x1b[0m / Blue \x1b[97;44m ' + data[3].toString() + ' \x1b[0m.';
+        console.log(tempString);
+        tempString = 'Breakout Gardener -> TCS3472 -> Color temperature \x1b[30;43m ' + data[4].toString() + ' °K \x1b[0m / Lux \x1b[30;107m ' + data[5].toString() + ' \x1b[0m.';
+        console.log(tempString);
+    }
 }
 
 // ====================
@@ -169,7 +173,7 @@ function Display(refreshAll)
 			SH1107.DrawSeparatorLine();
 			SH1107.DrawTextSmall('TEMP:', 4, 9, false);
 			SH1107.DrawTextSmall('LUX:', 4, 11, false);
-			SH1107.DrawTextSmall("LIGHT (TCS3472)", 15, 16, false);
+			SH1107.DrawTextSmall("TCS3472", 37, 16, false);
 		}
 
 		SH1107.DrawTextSmall(data[0].toString(), 80, 0, true); // Clear
@@ -184,7 +188,7 @@ function Display(refreshAll)
 
 	// ====================
 
-	if (IS31FL3731.IsAvailable())
+	if (IS31FL3731_RGB.IsAvailable())
 	{
 		const icon = [0x000000, 0x000000, 0x000000, 0x000000, 0x000000,
 					  0x000000, 0x000000, 0x000000, 0x000000, 0x000000,
@@ -195,7 +199,14 @@ function Display(refreshAll)
 		var rgb = (data[1] << 16) + (data[2] << 8) + data[3];
 		icon[6] = icon[7] = icon[8] = icon[11] = icon[12] = icon[13] = icon[16] = icon[17] = icon[18] = rgb;
 
-		IS31FL3731.Display(icon);
+		IS31FL3731_RGB.Display(icon);
+	}
+
+	// ====================
+
+	if (IS31FL3731_WHITE.IsAvailable())
+	{
+		IS31FL3731_WHITE.DrawString("#");
 	}
 
 	// ====================

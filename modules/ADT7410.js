@@ -5,7 +5,8 @@
 
 const i2c = require('i2c-bus'); // -> https://github.com/fivdi/i2c-bus
 const SH1107 = require('./SH1107.js');
-const IS31FL3731 = require('./IS31FL3731.js');
+const IS31FL3731_RGB = require('./IS31FL3731_RGB.js');
+const IS31FL3731_WHITE = require('./IS31FL3731_WHITE.js');
 
 module.exports = {
 	Identify: Identify,
@@ -36,7 +37,7 @@ function Identify(bus, address)
 	if (I2C_ADDRESS_ADT7410 > 0) return false;
 
 	// Identify using the manufacturer ID (0x19) of the ADT7410 device...
-	var manufacturerID = (bus.readByteSync(address, 0x0b) & 0b00011111);
+	var manufacturerID = (bus.readByteSync(address, 0x0b) >> 3);
 	if (manufacturerID == 0x19)
 	{
 		I2C_BUS = bus;
@@ -72,10 +73,11 @@ function Stop() { return; }
 function Get()
 {
 	// Fetch the raw temperature reading (two's complement format) from the sensor...
-	var tempRaw = I2C_BUS.readWordSync(I2C_ADDRESS_ADT7410, 0x00);
+	// var tempRaw = I2C_BUS.readWordSync(I2C_ADDRESS_ADT7410, 0x00); // Note: Word read does not work for this device
+	var tempRaw = (I2C_BUS.readByteSync(I2C_ADDRESS_ADT7410, 0x00) << 8) + I2C_BUS.readByteSync(I2C_ADDRESS_ADT7410, 0x01);
 
 	// Calculate the ambient temperature in degrees C...
-	var temperature = 0;
+	var temperature = 0.0;
 	if (tempRaw > 32767) temperature = (tempRaw - 65536) / 128; // Temperature is < 0 °C
 	else temperature = tempRaw / 128; // Temperature is >= 0 °C
 
@@ -88,7 +90,7 @@ function Get()
 
 function Log()
 {
-	console.log("Breakout Gardener -> ADT7410 -> Temperature \x1b[97;44m %s °C \x1b[0m.", data[0].toFixed(1));
+	if (outputLogs) console.log("Breakout Gardener -> ADT7410 -> Temperature \x1b[97;44m %s °C \x1b[0m.", data[0].toFixed(1));
 }
 
 // ====================
@@ -104,7 +106,7 @@ function Display(refreshAll)
 			SH1107.Off();
 			SH1107.Clear();
 			SH1107.DrawSeparatorLine();
-			SH1107.DrawTextSmall("NEARBY (ADT7410)", 6, 16, false);
+			SH1107.DrawTextSmall("ADT7410", 39, 16, false);
 		}
 
 		// Display the temperature rounded to the nearest integer...
@@ -125,7 +127,7 @@ function Display(refreshAll)
 
 	// ====================
 
-	if (IS31FL3731.IsAvailable())
+	if (IS31FL3731_RGB.IsAvailable())
 	{
 		const icon = [0x000000, 0x000000, 0x000000, 0x000000, 0x000000,
 					  0x000000, 0x000000, 0x000000, 0x000000, 0x000000,
@@ -140,7 +142,14 @@ function Display(refreshAll)
 		else if (data[0] > 17) icon[15] = icon[16] = icon[17] = icon[18] = icon[19] = 0x00aaaa; // Cyan 17-19 °C
 		else icon[20] = icon[21] = icon[22] = icon[23] = icon[24] = 0x0000aa; // Blue < 17 °C
 
-		IS31FL3731.Display(icon);
+		IS31FL3731_RGB.Display(icon);
+	}
+
+	// ====================
+
+	if (IS31FL3731_WHITE.IsAvailable())
+	{
+		IS31FL3731_WHITE.DrawString(Math.round(data[0]).toString());
 	}
 
 	// ====================

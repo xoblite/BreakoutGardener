@@ -5,7 +5,8 @@
 
 const { exec } = require('child_process');
 const SH1107 = require('./SH1107.js');
-const IS31FL3731 = require('./IS31FL3731.js');
+const IS31FL3731_RGB = require('./IS31FL3731_RGB.js');
+const IS31FL3731_WHITE = require('./IS31FL3731_WHITE.js');
 
 module.exports = {
 	Identify: Identify,
@@ -150,8 +151,11 @@ function Get()
 
 function Log()
 {
-	if (temperatureValues.length > 1) console.log("Breakout Gardener -> DS18B20 -> Temperature -> Indoors \x1b[97;104m %s °C \x1b[0m / Outdoors \x1b[97;104m %s °C \x1b[0m.", temperatureValues[0], temperatureValues[1]);
-	else if (temperatureValues.length == 1) console.log("Breakout Gardener -> DS18B20 -> Temperature -> \x1b[97;104m %s °C \x1b[0m.", temperatureValues[0]);
+    if (outputLogs)
+    {
+        if (temperatureValues.length > 1) console.log("Breakout Gardener -> DS18B20 -> Temperature -> Indoors \x1b[97;104m %s °C \x1b[0m / Outdoors \x1b[97;104m %s °C \x1b[0m.", temperatureValues[0], temperatureValues[1]);
+        else if (temperatureValues.length == 1) console.log("Breakout Gardener -> DS18B20 -> Temperature -> \x1b[97;104m %s °C \x1b[0m.", temperatureValues[0]);
+    }
 }
 
 // ====================
@@ -168,13 +172,13 @@ function Display(refreshAll)
 		{
 			SH1107.Off();
 			SH1107.Clear();
-			if (data.length > 0) SH1107.DrawTextSmall("INDOORS", 4, 1, false);
+			if (data.length > 0) SH1107.DrawTextSmall("INDOORS:", 4, 1, false);
 			if (data.length > 1)
 			{
 				SH1107.DrawSeparatorLine(7);
-				SH1107.DrawTextSmall("OUTDOORS", 4, 8, false);
+				SH1107.DrawTextSmall("OUTDOORS:", 4, 8, false);
 			}
-			SH1107.DrawTextSmall("WIRED (DS18B20)", 17, 16, false);
+			SH1107.DrawTextSmall("DS18B20", 40, 16, false);
 		}
 	
 		if (data.length > 0)
@@ -193,7 +197,7 @@ function Display(refreshAll)
 
 	// ====================
 
-	if (IS31FL3731.IsAvailable())
+	if (IS31FL3731_RGB.IsAvailable())
 	{
 		// Let's draw something else than a temperature indicator for this one...
 		// It's mostly nice weather indoors, so how about a sunny day icon? =]
@@ -203,7 +207,14 @@ function Display(refreshAll)
 					  0x000088, 0x888800, 0x888800, 0x888800, 0x000088,
 					  0x000088, 0x000088, 0x888800, 0x000088, 0x000088 ];
 
-		IS31FL3731.Display(icon);
+		IS31FL3731_RGB.Display(icon);
+	}
+
+	// ====================
+
+	if (IS31FL3731_WHITE.IsAvailable())
+	{
+		IS31FL3731_WHITE.DrawString(Math.round(data[0]).toString()); // Indoor temperature
 	}
 
 	// ====================

@@ -5,7 +5,8 @@
 
 const i2c = require('i2c-bus'); // -> https://github.com/fivdi/i2c-bus
 const SH1107 = require('./SH1107.js');
-const IS31FL3731 = require('./IS31FL3731.js');
+const IS31FL3731_RGB = require('./IS31FL3731_RGB.js');
+const IS31FL3731_WHITE = require('./IS31FL3731_WHITE.js');
 
 module.exports = {
 	Identify: Identify,
@@ -132,7 +133,7 @@ function Get()
 
 function Log()
 {
-	console.log("Breakout Gardener -> BMP280 -> Temperature \x1b[97;44m %s °C \x1b[0m / Pressure \x1b[97;44m %s hPa \x1b[0m.", data[0].toFixed(1), data[1].toFixed(0));
+    if (outputLogs) console.log("Breakout Gardener -> BMP280 -> Temperature \x1b[97;44m %s °C \x1b[0m / Pressure \x1b[97;44m %s hPa \x1b[0m.", data[0].toFixed(1), data[1].toFixed(0));
 }
 
 // ====================
@@ -149,30 +150,23 @@ function Display(refreshAll)
 		{
 			SH1107.Off();
 			SH1107.Clear();
-			SH1107.DrawSeparatorLine();
-			SH1107.DrawTextSmall("NEARBY (BMP280)", 12, 16, false);
+			SH1107.DrawTextSmall("PRESSURE:", 4, 1, false);
+			SH1107.DrawSeparatorLine(7);
+			SH1107.DrawTextSmall("TEMPERATURE:", 4, 8, false);
+			SH1107.DrawTextSmall("BMP280", 41, 16, false);
 		}
 
-		var roundedTemperature = Math.round(data[0]);
-		var textString = roundedTemperature.toString();
-		if (roundedTemperature > 10)
-		{
-			SH1107.DrawNumberLarge(parseInt(textString[0]), 10, 1);
-			SH1107.DrawNumberLarge(parseInt(textString[1]), 1, 1);
-		}
-		else SH1107.DrawNumberLarge(parseInt(textString[0]), 1, 1);
-
+		textString = data[1].toFixed(0) + '  HPA';
+		SH1107.DrawTextMedium(textString, 8, 3, true);
 		textString = data[0].toFixed(1) + ' *C';
-		SH1107.DrawTextMedium(textString, 24, 9, true);
-		textString = data[1].toFixed(0) + ' HPA';
-		SH1107.DrawTextSmall(textString, 40, 12, true);
+		SH1107.DrawTextMedium(textString, 24, 10, true);
 
 		if (refreshAll) SH1107.On();
 	}
 
 	// ====================
 
-	if (IS31FL3731.IsAvailable())
+	if (IS31FL3731_RGB.IsAvailable())
 	{
 		const icon = [0x000000, 0x000000, 0x000000, 0x000000, 0x000000,
 					  0x000000, 0x000000, 0x000000, 0x000000, 0x000000,
@@ -187,7 +181,14 @@ function Display(refreshAll)
 		else if (data[0] > 17) icon[15] = icon[16] = icon[17] = icon[18] = icon[19] = 0x00aaaa; // Cyan 17-19 °C
 		else icon[20] = icon[21] = icon[22] = icon[23] = icon[24] = 0x0000aa; // Blue < 17 °C
 
-		IS31FL3731.Display(icon);
+		IS31FL3731_RGB.Display(icon);
+	}
+
+	// ====================
+
+	if (IS31FL3731_WHITE.IsAvailable())
+	{
+		IS31FL3731_WHITE.DrawString(Math.round(data[0]).toString());
 	}
 
 	// ====================

@@ -408,18 +408,9 @@ function DrawSeparatorLine(row)
 
 // ====================
 
-function DrawMeterBar(percentage, vertical)
+function DrawMeterBar(percentage, yoffset)
 {
     var meterLevel = percentage + 2; // Meter level 0-100% plus 2 pixels "always visible" -> Max 102 pixels wide
-
-    var yoffset = 0x7;
-    switch (vertical)
-    {
-        case 1: { yoffset = 0x1; break; }
-        case 2: { yoffset = 0x4; break; }
-        case 3: { yoffset = 0x7; break; }
-        case 4: { yoffset = 0xa; break; }
-    }
 
     DisplaySetPosition(0, yoffset); // Top half...
     for (var n=0; n<13; n++) I2C_BUS.writeByteSync(I2C_ADDRESS_SH1107, 0x40, 0x00); // Left padding -> (128-102)/2 = 13 pixels
@@ -500,6 +491,7 @@ const charTilde = [0x08, 0x04, 0x04, 0x08, 0x10, 0x10, 0x08, 0x00];
 // 7x8 pixel characters...
 const charMinus = [0x10, 0x10, 0x10, 0x10, 0x10, 0x00, 0x00];
 const charPlus = [0x10, 0x10, 0x7c, 0x10, 0x10, 0x00, 0x00];
+const charAmpersand = [0x44, 0xaa, 0x92, 0xaa, 0x44, 0xa0, 0x00];
 
 // 4x8 pixel characters...
 //const charDegrees = [0x03, 0x03, 0x00, 0x00];
@@ -515,6 +507,7 @@ const charParenEnd = [0x82, 0x7c, 0x00];
 
 // 2x8 pixel characters...
 const charI = [0xfe, 0x00];
+const charExclamation = [0xbe, 0x00];
 
 var invert = 0xff; // When inverted text -> Draw black letters on white background -> Character data XOR 0xff
 
@@ -574,12 +567,14 @@ function ParseTextSmall(character)
         case '.': { return DrawCharSmall(charPeriod); break; }
         case ':': { return DrawCharSmall(charColon); break; }
         case '%': { return DrawCharSmall(charPercentage); break; }
+        case '&': { return DrawCharSmall(charAmpersand); break; }
         case '(': { return DrawCharSmall(charParenBeg); break; }
         case ')': { return DrawCharSmall(charParenEnd); break; }
         case '-': { return DrawCharSmall(charMinus); break; }
         case '+': { return DrawCharSmall(charPlus); break; }
         case '/': { return DrawCharSmall(charSlash); break; }
         case '~': { return DrawCharSmall(charTilde); break; }
+        case '!': { return DrawCharSmall(charExclamation); break; }
         default: { return DrawCharSmall(charSpace); break; }
     }    
 }
@@ -708,12 +703,14 @@ function ParseTextMedium(character, half)
         case '.': { return DrawCharMedium(charPeriod, half); break; }
         case ':': { return DrawCharMedium(charColon, half); break; }
         case '%': { return DrawCharMedium(charPercentage, half); break; }
+        case '&': { return DrawCharMedium(charAmpersand, half); break; }
         case '(': { return DrawCharMedium(charParenBeg, half); break; }
         case ')': { return DrawCharMedium(charParenEnd, half); break; }
         case '-': { return DrawCharMedium(charMinus, half); break; }
         case '+': { return DrawCharMedium(charPlus, half); break; }
         case '/': { return DrawCharMedium(charSlash, half); break; }
         case '~': { return DrawCharMedium(charTilde, half); break; }
+        case '!': { return DrawCharMedium(charExclamation); break; }
         default: { return DrawCharMedium(charSpace, half); break; }
     }
 }
@@ -723,6 +720,8 @@ function ParseTextMedium(character, half)
 function DrawTextMedium(arguments, xoffset, yoffset, eraseToTheRight)
 {
     invert = 0x00; // Medium sized characters are always white text on black background
+
+    var xrightmost = 0;
 
     for (var half=0; half<=1; half++)
     {
@@ -735,6 +734,8 @@ function DrawTextMedium(arguments, xoffset, yoffset, eraseToTheRight)
             if (remaining < 16) break; // No more room... (nb. medium character bitmaps are up to 16 pixels wide)
             remaining -= ParseTextMedium(arguments[n], (half==0));
         }
+
+        xrightmost = 128 - remaining; // See below :)
     
         // ...and erase the remaining x columns on the row to eliminate any zombie text remnants... ;)
         if (eraseToTheRight && (remaining > 0))
@@ -748,6 +749,8 @@ function DrawTextMedium(arguments, xoffset, yoffset, eraseToTheRight)
             for (var n=0; n<remaining; n++) I2C_BUS.writeByteSync(I2C_ADDRESS_SH1107, 0x40, 0x00);
         }    
     }
+
+    return xrightmost; // Return the rightmost x position of the newly drawn text (useful for e.g. further ops on the same line(s))
 }
 
 // ================================================================================

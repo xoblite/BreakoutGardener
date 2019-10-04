@@ -5,8 +5,8 @@
 
 const i2c = require('i2c-bus'); // -> https://github.com/fivdi/i2c-bus
 const SH1107 = require('./SH1107.js');
-const IS31FL3731 = require('./IS31FL3731.js');
-//function sleep(msecs) { return new Promise(resolve => setTimeout(resolve, msecs)); } // Helper function
+const IS31FL3731_RGB = require('./IS31FL3731_RGB.js');
+const IS31FL3731_WHITE = require('./IS31FL3731_WHITE.js');
 
 module.exports = {
 	Identify: Identify,
@@ -137,8 +137,11 @@ function Get()
 
 function Log()
 {
-	console.log("Breakout Gardener -> ADS1015 -> Single ADC channels 0/1/2/3 (reference GND) at \x1b[30;106m %s V \x1b[0m / \x1b[30;106m %s V \x1b[0m / \x1b[30;106m %s V \x1b[0m / \x1b[30;106m %s V \x1b[0m.", data[0].toFixed(2), data[1].toFixed(2), data[2].toFixed(2), data[3].toFixed(2));
-	console.log("Breakout Gardener -> ADS1015 -> Differential ADC channels 0/1 and 2/3 at \x1b[30;46m %s V \x1b[0m / \x1b[30;46m %s V \x1b[0m.", data[4].toFixed(2), data[5].toFixed(2));
+    if (outputLogs)
+    {
+        console.log("Breakout Gardener -> ADS1015 -> Single ADC channels 0/1/2/3 (reference GND) at \x1b[30;106m %s V \x1b[0m / \x1b[30;106m %s V \x1b[0m / \x1b[30;106m %s V \x1b[0m / \x1b[30;106m %s V \x1b[0m.", data[0].toFixed(2), data[1].toFixed(2), data[2].toFixed(2), data[3].toFixed(2));
+        console.log("Breakout Gardener -> ADS1015 -> Differential ADC channels 0/1 and 2/3 at \x1b[30;46m %s V \x1b[0m / \x1b[30;46m %s V \x1b[0m.", data[4].toFixed(2), data[5].toFixed(2));
+    }
 }
 
 // ====================
@@ -162,7 +165,7 @@ function Display(refreshAll)
 			SH1107.DrawSeparatorLine(8);
 			SH1107.DrawTextSmall('D01:', 4, 9, false);
 			SH1107.DrawTextSmall('D23:', 4, 11, false);
-			SH1107.DrawTextSmall("ANALOG (ADS1015)", 12, 16, false);
+			SH1107.DrawTextSmall("ADS1015", 42, 16, false);
 		}
 	
 		var tempString = data[0].toFixed(2) + ' V'; // S0
@@ -183,7 +186,7 @@ function Display(refreshAll)
 
 	// ====================
 
-    if (IS31FL3731.IsAvailable())
+    if (IS31FL3731_RGB.IsAvailable())
     {
 		const icon = [0x000000, 0x000000, 0x000000, 0x000000, 0x000000,
 					  0x000000, 0x000000, 0x000000, 0x000000, 0x000000,
@@ -191,7 +194,7 @@ function Display(refreshAll)
 					  0x000000, 0x000000, 0x000000, 0x000000, 0x000000,
 					  0x000000, 0x000000, 0x000000, 0x000000, 0x000000 ];
 
-        // Draw load meters for each individual ADC channel S0/S1/S2/S3...
+        // Draw load meters for each individual ADC channels S0/S1/S2/S3...
 		for (var n=0; n<=3; n++)
 		{
 			var voltageInPercentOfMax = (data[n] / ads1015MaxVoltage) * 100;
@@ -209,7 +212,7 @@ function Display(refreshAll)
 		}
 
 		// ...and one for differential ADC channel D01... (sorry D23, only 5 rows to play with =] )
-		var voltageInPercentOfMax = (data[5] / ads1015MaxVoltage) * 100;
+		var voltageInPercentOfMax = (data[4] / ads1015MaxVoltage) * 100;
 
         if (voltageInPercentOfMax > 90) icon[24] = 0xaa6600;
         else if (voltageInPercentOfMax > 80) icon[24] = 0x442200;
@@ -222,9 +225,31 @@ function Display(refreshAll)
         if (voltageInPercentOfMax > 10) icon[20] = 0xaa6600;
         else icon[20] = 0x442200;
 
-		IS31FL3731.Display(icon);
+		IS31FL3731_RGB.Display(icon);
 	}
-	
+
+	// ====================
+
+	if (IS31FL3731_WHITE.IsAvailable())
+	{
+        // Draw load meters for each individual ADC channels S0/S1/S2/S3...
+		for (var n=0; n<=3; n++)
+		{
+			var voltageInPercentOfMax = (data[n] / ads1015MaxVoltage) * 100;
+			IS31FL3731_WHITE.DrawMeter(voltageInPercentOfMax, n);
+		}
+
+		// ...clear the row in between...
+		IS31FL3731_WHITE.DrawMeter(255, 4);
+
+		// ...and then draw load meters for differential ADC channels D01 and D23...
+		for (var n=5; n<=6; n++)
+		{
+			var voltageInPercentOfMax = (data[n-1] / ads1015MaxVoltage) * 100;
+			IS31FL3731_WHITE.DrawMeter(voltageInPercentOfMax, n);
+		}
+	}
+
 	// ====================
 
 	if (refreshAll) Log();
