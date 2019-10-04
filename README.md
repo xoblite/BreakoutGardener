@@ -7,7 +7,7 @@ Breakout Gardener currently supports the following devices and sensors (I2C unle
 
 - **ADS1015**: Texas Instruments ADS1015 Analog-To-Digital Converter ([example](https://shop.pimoroni.com/products/enviro-phat))
 - **ADT7410**: Analog Devices ADT7410 Digital Temperature Sensor ([example](https://www.adafruit.com/product/4089))
-- **ADXL343**: Analog Devices ADXL343 Triple-Axis Accelerometer ([example](https://www.adafruit.com/product/4089))
+- **ADXL343**: Analog Devices ADXL343 Triple-Axis Accelerometer ([example](https://www.adafruit.com/product/4097))
 - **BMP280**: Bosch Sensortec BMP280 Barometric Pressure Sensor ([example](https://shop.pimoroni.com/products/enviro-phat))
 - **CAP1166**: Microchip Technology CAP1166 Capacitive Touch Controller ([example](https://shop.pimoroni.com/products/touch-phat))
 - **DRV2605**: Texas Instruments DRV2605 based Pimoroni Linear Actuator Haptic Breakout ([example](https://shop.pimoroni.com/products/drv2605l-linear-actuator-haptic-breakout))
