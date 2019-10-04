@@ -23,7 +23,7 @@ Breakout Gardener currently supports the following devices and sensors (I2C unle
 - **VCNL4010**: Vishay Semiconductors VCNL4010 Proximity/Light Sensor ([example](https://www.adafruit.com/product/466))
 - **VEML6075**: Vishay Semiconductors VEML6075 UVA and UVB Light Sensor ([example](https://www.adafruit.com/product/3964))
 
-...as well as the following exclusive add-on module for electric car owners like myself... ::smile::
+...as well as the following exclusive add-on module for electric car owners like myself... :smile:
 
 - **KEBAP30**: KEBA KeContact P30 series wallbox charging station ([link](https://www.keba.com/en/emobility/products/product-overview/product_overview))
 
