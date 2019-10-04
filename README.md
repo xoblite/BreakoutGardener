@@ -31,9 +31,9 @@ It also supports additional display modes through its **SYSTEM**, **CLOCK** and 
 
 Anyway, without further ado:
 
-*- Install Node.js (I have tested with v10.16.x LTS)*
+*- Install [Node.js](https://nodejs.org/) (I have tested with v10.16.x LTS)*
 <br>*- Clone this repository*
-<br>*- Install i2c-bus (I have tested with v5.0.0)*
+<br>*- Install [i2c-bus](https://github.com/fivdi/i2c-bus) (I have tested with v5.0.0)*
 <br>*- Run!*
 
 Enjoy! :sunglasses:
