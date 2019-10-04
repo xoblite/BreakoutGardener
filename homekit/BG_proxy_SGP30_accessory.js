@@ -21,11 +21,11 @@ var SGP30 = {
   name: "SGP30", // Name of accessory (changeable by the user)
   pincode: "031-45-154", // Pin code of accessory -> "Default" HAP-NodeJS accessory pin code
   username: "B4:2E:49:D2:94:5C", // MAC like address used by HomeKit to differentiate accessories
-  manufacturer: "homekit.xoblite.net", // Manufacturer (optional)
+  manufacturer: "breakouts.xoblite.net", // Manufacturer (optional)
   model: "SGP30", // Model (optional, not changeable by the user)
   // hardwareRevision: "1.0", // Hardware version (optional)
-  firmwareRevision: "19.5.30", // Firmware version (optional)
-  serialNumber: "HAP-NodeJS", // Serial number (optional)
+  firmwareRevision: "19.10.4", // Firmware version (optional)
+  serialNumber: "Breakout Gardener", // Serial number (optional)
   outputLogs: true, // Enable logging to the console?
 }
 
