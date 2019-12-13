@@ -412,8 +412,9 @@ function DrawMeterBar(percentage, yoffset)
 {
     var meterLevel = percentage + 2; // Meter level 0-100% plus 2 pixels "always visible" -> Max 102 pixels wide
 
-    DisplaySetPosition(0, yoffset); // Top half...
-    for (var n=0; n<13; n++) I2C_BUS.writeByteSync(I2C_ADDRESS_SH1107, 0x40, 0x00); // Left padding -> (128-102)/2 = 13 pixels
+//  DisplaySetPosition(0, yoffset); // Top half...
+//  for (var n=0; n<13; n++) I2C_BUS.writeByteSync(I2C_ADDRESS_SH1107, 0x40, 0x00); // Left padding -> (128-102)/2 = 13 pixels
+    DisplaySetPosition(13, yoffset); // Top half...
     for (var n=0; n<102; n++) // 2+100 = 102 pixels meter bar
     {
         if (n < meterLevel)
@@ -423,10 +424,11 @@ function DrawMeterBar(percentage, yoffset)
         }
         else I2C_BUS.writeByteSync(I2C_ADDRESS_SH1107, 0x40, 0x00);
     }
-    for (var n=0; n<13; n++) I2C_BUS.writeByteSync(I2C_ADDRESS_SH1107, 0x40, 0x00); // Right padding -> (128-102)/2 = 13 pixels
+//  for (var n=0; n<13; n++) I2C_BUS.writeByteSync(I2C_ADDRESS_SH1107, 0x40, 0x00); // Right padding -> (128-102)/2 = 13 pixels
 
-    DisplaySetPosition(0, yoffset+1); // Bottom half...
-    for (var n=0; n<13; n++) I2C_BUS.writeByteSync(I2C_ADDRESS_SH1107, 0x40, 0x00);
+//  DisplaySetPosition(0, yoffset+1); // Bottom half...
+//  for (var n=0; n<13; n++) I2C_BUS.writeByteSync(I2C_ADDRESS_SH1107, 0x40, 0x00);
+    DisplaySetPosition(13, yoffset+1); // Bottom half...
     for (var n=0; n<102; n++)
     {
         if (n < meterLevel)
@@ -440,7 +442,7 @@ function DrawMeterBar(percentage, yoffset)
             else I2C_BUS.writeByteSync(I2C_ADDRESS_SH1107, 0x40, 0x00);
         }
     }
-    for (var n=0; n<13; n++) I2C_BUS.writeByteSync(I2C_ADDRESS_SH1107, 0x40, 0x00);
+//  for (var n=0; n<13; n++) I2C_BUS.writeByteSync(I2C_ADDRESS_SH1107, 0x40, 0x00);
 }
 
 // ================================================================================

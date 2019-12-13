@@ -7,6 +7,7 @@ const i2c = require('i2c-bus'); // -> https://github.com/fivdi/i2c-bus
 const SH1107 = require('./SH1107.js');
 const IS31FL3731_RGB = require('./IS31FL3731_RGB.js');
 const IS31FL3731_WHITE = require('./IS31FL3731_WHITE.js');
+const HT16K33 = require('./HT16K33.js');
 
 module.exports = {
 	Identify: Identify,
@@ -203,7 +204,18 @@ function Display(refreshAll)
 		if (relativeProximity >= 0) img[66] = 30;
 
 		IS31FL3731_WHITE.Display(img);
-	}
+    }
+    
+    // ====================
+    
+    if (HT16K33.IsAvailable())
+    {
+		var relativeProximity = Math.round(((data[1]-proximityOffset) * 999) / 16384); // Note: <...same rationale as above...>
+        if (data[1] > 16384) relativeProximity = 999;
+
+        var proximity = '#' + relativeProximity.toString();
+        HT16K33.Display(proximity);
+    }
 
 	// ====================
 

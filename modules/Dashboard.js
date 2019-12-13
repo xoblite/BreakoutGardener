@@ -8,10 +8,12 @@ const http = require('http');
 const ADS1015 = require('./ADS1015.js');
 const ADT7410 = require('./ADT7410.js');
 const ADXL343 = require('./ADXL343.js');
+const AS7262 = require('./AS7262.js');
 const BMP280 = require('./BMP280.js');
 const CAP1166 = require('./CAP1166.js');
 const DRV2605 = require('./DRV2605.js');
 const DS18B20 = require('./DS18B20.js');
+const HT16K33 = require('./HT16K33.js');
 const IS31FL3731_RGB = require('./IS31FL3731_RGB.js');
 const IS31FL3731_WHITE = require('./IS31FL3731_WHITE.js');
 const KEBA_P30 = require('./KEBA_P30.js');
@@ -138,7 +140,7 @@ function Start(port, multiple, version, logs, debug)
             response.write("   <div class=\"reload\"><a href=\"javascript:reloadPage();\">Reload</a></div>");
             response.write("\n   <div class=\"visualize\"><a href=\"/\" target=\"_blank\" onmouseover=\"javascript:event.target.port=3000\">Visualize</a></div>"); // -> Open Grafana [host:3000] in a new window/tab
             response.write("\n   <div class=\"shop\"><a href=\"javascript:popupShops();\">Shop</a></div>");
-            response.write("\n   <div id=\"popup\" class=\"popup\">&#x25cf; <a href=\"https://shop.pimoroni.com/collections/breakout-garden\" target=\"_blank\">Pimoroni</a> (UK)<br>&#x25cf; <a href=\"https://www.adafruit.com/?q=I2C%20Breakout\" target=\"_blank\">Adafruit Industries</a> (US)</div>");
+            response.write("\n   <div id=\"popup\" class=\"popup\">&#x25cf; <a href=\"https://shop.pimoroni.com/collections/breakout-garden?sort=new\" target=\"_blank\">Pimoroni</a> (UK)<br>&#x25cf; <a href=\"https://www.adafruit.com/?q=I2C%20Breakout\" target=\"_blank\">Adafruit Industries</a> (US)</div>");
 
             // ### TO-DO / POSSIBLE FUTURE ENHANCEMENT: OPEN GRAFANA IN AN EMBEDDED IFRAME INSTEAD OF IN A NEW TAB/WINDOW ? ###
             // response.write("\n   <div id=\"grafana\" class=\"grafana\"><iframe src=\"http://google.se/\" width=\"1680\" height=\"720\" marginheight=\"0\" frameborder=\"no\" scrolling=\"yes\"># ...ERROR... #</iframe></div>");
@@ -147,25 +149,25 @@ function Start(port, multiple, version, logs, debug)
 
             // ====================
 
-            var columnSpanning = 10;
-            if (!dashboardMultipleRows) columnSpanning = 20;
+            var columnSpanning = 11;
+            if (!dashboardMultipleRows) columnSpanning = 21;
 
             var cpuLoad = SYSTEM.GetCPULoad();
             var cpuTemperature = SYSTEM.GetCPUTemperature();
             var memoryUsageInPercent = SYSTEM.GetMemoryUsageInPercent();
-            if (cpuLoad.Cores.length == 4) response.write("<tr><td colspan=\"" + columnSpanning + "\" class=\"system\"><b><u>SYSTEM</u></b>&emsp;&ensp;CPU load per core:&nbsp;&nbsp;&nbsp;&#x2460; " + cpuLoad.Cores[0].toFixed(1) + "%&nbsp;&nbsp;&nbsp;&#x2461; " + cpuLoad.Cores[1].toFixed(1) + "%&nbsp;&nbsp;&nbsp;&#x2462; " + cpuLoad.Cores[2].toFixed(1) + "%&nbsp;&nbsp;&nbsp;&#x2463; " + cpuLoad.Cores[3].toFixed(1) + "%&nbsp;&nbsp;&nbsp;&#x2502;&nbsp;&nbsp;&nbsp;Across all cores:&nbsp;&nbsp;&nbsp;" + cpuLoad.AllCores.toFixed(0) + "%&nbsp;&nbsp;&nbsp;&#x2502;&nbsp;&nbsp;&nbsp;CPU temperature:&nbsp;&nbsp;&nbsp;" + cpuTemperature.toFixed(1) + " °C&nbsp;&nbsp;&nbsp;&#x2502;&nbsp;&nbsp;&nbsp;Memory usage:&nbsp;&nbsp;&nbsp;" + memoryUsageInPercent.toFixed(0) + "%&nbsp;&nbsp;&nbsp;&#x2502;&nbsp;&nbsp;&nbsp;Timestamp:&nbsp;&nbsp;&nbsp;" + CLOCK.Get() + "</td></tr>\n<tr>\n");
-            else response.write("<tr><td colspan=\"" + columnSpanning + "\" class=\"system\"><b><u>SYSTEM</u></b>&emsp;&ensp;CPU load across all cores:&nbsp;&nbsp;&nbsp;" + cpuLoad.AllCores.toFixed(0) + "%&nbsp;&nbsp;&nbsp;&#x2502;&nbsp;&nbsp;&nbsp;CPU temperature:&nbsp;&nbsp;&nbsp;" + cpuTemperature.toFixed(1) + " °C&nbsp;&nbsp;&nbsp;&#x2502;&nbsp;&nbsp;&nbsp;Memory usage:&nbsp;&nbsp;&nbsp;" + memoryUsageInPercent.toFixed(0) + "%&nbsp;&nbsp;&nbsp;&#x2502;&nbsp;&nbsp;&nbsp;Timestamp:&nbsp;&nbsp;&nbsp;" + CLOCK.Get() + "</td></tr>\n");
+            if (cpuLoad.Cores.length == 4) response.write("<tr>\n<td colspan=\"" + columnSpanning + "\" class=\"system\"><b><u>SYSTEM</u></b>&emsp;&ensp;CPU load per core:&nbsp;&nbsp;&nbsp;&#x2460; " + cpuLoad.Cores[0].toFixed(1) + "%&nbsp;&nbsp;&nbsp;&#x2461; " + cpuLoad.Cores[1].toFixed(1) + "%&nbsp;&nbsp;&nbsp;&#x2462; " + cpuLoad.Cores[2].toFixed(1) + "%&nbsp;&nbsp;&nbsp;&#x2463; " + cpuLoad.Cores[3].toFixed(1) + "%&nbsp;&nbsp;&nbsp;&#x2502;&nbsp;&nbsp;&nbsp;Across all cores:&nbsp;&nbsp;&nbsp;" + cpuLoad.AllCores.toFixed(0) + "%&nbsp;&nbsp;&nbsp;&#x2502;&nbsp;&nbsp;&nbsp;CPU temperature:&nbsp;&nbsp;&nbsp;" + cpuTemperature.toFixed(1) + " °C&nbsp;&nbsp;&nbsp;&#x2502;&nbsp;&nbsp;&nbsp;Memory usage:&nbsp;&nbsp;&nbsp;" + memoryUsageInPercent.toFixed(0) + "%&nbsp;&nbsp;&nbsp;&#x2502;&nbsp;&nbsp;&nbsp;Timestamp:&nbsp;&nbsp;&nbsp;" + CLOCK.Get() + "</td>\n</tr>");
+            else response.write("<tr>\n<td colspan=\"" + columnSpanning + "\" class=\"system\"><b><u>SYSTEM</u></b>&emsp;&ensp;CPU load across all cores:&nbsp;&nbsp;&nbsp;" + cpuLoad.AllCores.toFixed(0) + "%&nbsp;&nbsp;&nbsp;&#x2502;&nbsp;&nbsp;&nbsp;CPU temperature:&nbsp;&nbsp;&nbsp;" + cpuTemperature.toFixed(1) + " °C&nbsp;&nbsp;&nbsp;&#x2502;&nbsp;&nbsp;&nbsp;Memory usage:&nbsp;&nbsp;&nbsp;" + memoryUsageInPercent.toFixed(0) + "%&nbsp;&nbsp;&nbsp;&#x2502;&nbsp;&nbsp;&nbsp;Timestamp:&nbsp;&nbsp;&nbsp;" + CLOCK.Get() + "</td>\n</tr>");
 
-            response.write("<tr>\n");
+            response.write("\n<tr>");
 
             // ====================
 
             if (ADS1015.IsAvailable())
             {
                 var ads1015 = ADS1015.Get();
-                response.write("   <td><b><u>ADS1015</u></b><br><br>S0:&nbsp;&nbsp;&nbsp;" + ads1015[0].toFixed(2) + " V<br>S1:&nbsp;&nbsp;&nbsp;" + ads1015[1].toFixed(2) + " V<br>S2:&nbsp;&nbsp;&nbsp;" + ads1015[2].toFixed(2) + " V<br>S3:&nbsp;&nbsp;&nbsp;" + ads1015[3].toFixed(2) + " V<br><br>D01:&nbsp;&nbsp;&nbsp;" + ads1015[4].toFixed(2) + " V<br>D23:&nbsp;&nbsp;&nbsp;" + ads1015[5].toFixed(2) + " V</td>");    
+                response.write("\n   <td><b><u>ADS1015</u></b><br><br>S0:&nbsp;&nbsp;&nbsp;" + ads1015[0].toFixed(2) + " V<br>S1:&nbsp;&nbsp;&nbsp;" + ads1015[1].toFixed(2) + " V<br>S2:&nbsp;&nbsp;&nbsp;" + ads1015[2].toFixed(2) + " V<br>S3:&nbsp;&nbsp;&nbsp;" + ads1015[3].toFixed(2) + " V<br><br>D01:&nbsp;&nbsp;&nbsp;" + ads1015[4].toFixed(2) + " V<br>D23:&nbsp;&nbsp;&nbsp;" + ads1015[5].toFixed(2) + " V</td>");    
             }
-            else response.write("   <td class=\"disabled\"><b><u>ADS1015</u></b>");
+            else response.write("\n   <td class=\"disabled\"><b><u>ADS1015</u></b></td>");
 
             // ====================
 
@@ -174,7 +176,7 @@ function Start(port, multiple, version, logs, debug)
                 var adt7410 = ADT7410.Get();
                 response.write("\n   <td><b><u>ADT7410</u></b><br><br>Temperature:<br>" + adt7410[0].toFixed(1) + " °C</td>");
             }
-            else response.write("   <td class=\"disabled\"><b><u>ADT7410</u></b>");
+            else response.write("\n   <td class=\"disabled\"><b><u>ADT7410</u></b></td>");
 
             // ====================
 
@@ -190,7 +192,40 @@ function Start(port, multiple, version, logs, debug)
                 }
                 else response.write("<br>None</td>");
             }
-            else response.write("   <td class=\"disabled\"><b><u>ADXL343</u></b>");
+            else response.write("\n   <td class=\"disabled\"><b><u>ADXL343</u></b></td>");
+
+            // ====================
+
+            if (AS7262.IsAvailable())
+            {
+                var as7262 = AS7262.Get();
+
+                response.write("\n   <td><b><u>AS7262</u></b><br><br>");
+
+                for (var n=0; n<=5; n++)
+                {
+                    var meter = '';
+
+                    if (n == 0) meter = "<font color=\"#6600aa\">"; // Violet
+                    if (n == 1) meter = "<font color=\"#0000aa\">"; // Blue
+                    if (n == 2) meter = "<font color=\"#008800\">"; // Green
+                    if (n == 3) meter = "<font color=\"#aa8800\">"; // Yellow
+                    if (n == 4) meter = "<font color=\"#aa4400\">"; // Orange
+                    if (n == 5) meter = "<font color=\"#aa0000\">"; // Red
+
+                    if (as7262[n] > 0) meter += '&#x2588;';
+                    if (as7262[n] > 20) meter += '&#x2588;';
+                    if (as7262[n] > 40) meter += '&#x2588;';
+                    if (as7262[n] > 60) meter += '&#x2588;';
+                    if (as7262[n] > 80) meter += '&#x2588;';
+
+                    meter += '</font><br>';
+                    response.write(meter);
+                }
+
+                response.write("</td>");
+            }
+            else response.write("\n   <td class=\"disabled\"><b><u>AS7262</u></b></td>");
 
             // ====================
 
@@ -199,7 +234,7 @@ function Start(port, multiple, version, logs, debug)
                 var bmp280 = BMP280.Get();
                 response.write("\n   <td><b><u>BMP280</u></b><br><br>Pressure:<br>" + bmp280[1].toFixed(0) + " hPa<br><br>Temperature:<br>" + bmp280[0].toFixed(1) + " °C</td>");
             }
-            else response.write("   <td class=\"disabled\"><b><u>BMP280</u></b>");
+            else response.write("\n   <td class=\"disabled\"><b><u>BMP280</u></b></td>");
 
             // ====================
 
@@ -237,7 +272,7 @@ function Start(port, multiple, version, logs, debug)
 
                 response.write("\n   <td><b><u>CAP1166</u></b><br><br>Touch:<br>" + touch + "<br><br>LEDs:<br>" + leds + "</td>");
             }
-            else response.write("   <td class=\"disabled\"><b><u>CAP1166</u></b>");
+            else response.write("\n   <td class=\"disabled\"><b><u>CAP1166</u></b></td>");
 
             // ====================
 
@@ -245,7 +280,7 @@ function Start(port, multiple, version, logs, debug)
             {
                 response.write("\n   <td><b><u>DRV2605</u></b><br><br>Device<br>enabled</td>");
             }
-            else response.write("   <td class=\"disabled\"><b><u>DRV2605</u></b>");
+            else response.write("\n   <td class=\"disabled\"><b><u>DRV2605</u></b></td>");
 
             // ====================
 
@@ -255,7 +290,18 @@ function Start(port, multiple, version, logs, debug)
                 if (ds18b20.length > 1) response.write("\n   <td><b><u>DS18B20</u></b><br><br>Indoors:<br>" + ds18b20[0] + " °C<br><br>Outdoors:<br>" + ds18b20[1] + " °C</td>");
                 else response.write("\n   <td><b><u>DS18B20</u></b><br><br>Temperature:<br>" + ds18b20[0] + " °C</td>");
             }
-            else response.write("   <td class=\"disabled\"><b><u>DS18B20</u></b>");
+            else response.write("\n   <td class=\"disabled\"><b><u>DS18B20</u></b></td>");
+
+            // ====================
+
+            if (HT16K33.IsAvailable())
+            {
+                var ht16k33 = HT16K33.Get();
+//                if (ht16k33.length > 0) response.write("\n   <td><b><u>HT16K33</u></b><br><br>Device<br>enabled<br><br><font color=\"#88aa00\">" + ht16k33 + "</font></td>");
+//                else response.write("\n   <td><b><u>HT16K33</u></b><br><br>Device<br>enabled</td>");
+                response.write("\n   <td><b><u>HT16K33</u></b><br><br><font color=\"#88aa00\">\"" + ht16k33 + "\"</font></td>");
+            }
+            else response.write("\n   <td class=\"disabled\"><b><u>HT16K33</u></b></td>");
 
             // ====================
 
@@ -276,7 +322,7 @@ function Start(port, multiple, version, logs, debug)
                 tempString += "</td>";
                 response.write(tempString);
             }
-            else response.write("   <td class=\"disabled\"><b><u>IS31FL3731 (RGB)</u></b>");
+            else response.write("\n   <td class=\"disabled\"><b><u>IS31FL3731 (RGB)</u></b></td>");
 
             // ====================
 
@@ -298,7 +344,12 @@ function Start(port, multiple, version, logs, debug)
                 tempString += "</td>";
                 response.write(tempString);
             }
-            else response.write("   <td class=\"disabled\"><b><u>IS31FL3731 (W)</u></b>");
+            else response.write("\n   <td class=\"disabled\"><b><u>IS31FL3731 (W)</u></b></td>");
+
+            // ====================
+
+            // ### MOVE TO THE NEXT ROW IF DASHBOARD MULTIPLE ROW DISPLAY MODE IS ENABLED ###
+            if (dashboardMultipleRows) response.write("\n</tr>\n<tr>");
 
             // ====================
 
@@ -315,14 +366,9 @@ function Start(port, multiple, version, logs, debug)
                 if (kebap30[0] == 9) state = '(Checking)';
 
                 response.write("\n   <td><b><u>KEBA P30</u></b><br><br>State:<br>" + state + "<br><br>Power:<br>" + kebap30[1] + " kW (" + kebap30[2] + "%)<br><br>Energy transferred:<br>" + kebap30[3] + " kWh");
-                response.write("\n<br><br>Per phase:<br>" + kebap30[4] + " / " + kebap30[5] + " / " + kebap30[6] + " V<br>" + kebap30[7] + " / " + kebap30[8] + " / " + kebap30[9] + " A</td>");
+                response.write("<br><br>Per phase:<br>" + kebap30[4] + " / " + kebap30[5] + " / " + kebap30[6] + " V<br>" + kebap30[7] + " / " + kebap30[8] + " / " + kebap30[9] + " A</td>");
             }
-            else response.write("   <td class=\"disabled\"><b><u>KEBA P30</u></b>");
-
-            // ====================
-
-            // ### MOVE TO THE NEXT ROW IF DASHBOARD MULTIPLE ROW DISPLAY MODE IS ENABLED ###
-            if (dashboardMultipleRows) response.write("</tr>\n<tr>\n");
+            else response.write("\n   <td class=\"disabled\"><b><u>KEBA P30</u></b></td>");
 
             // ====================
 
@@ -331,7 +377,7 @@ function Start(port, multiple, version, logs, debug)
                 var lsm303d = LSM303D.Get();
                 response.write("\n   <td><b><u>LSM303D</u></b><br><br>Accelerometer:<br>X " + lsm303d[3].toFixed(2) + "<br>Y " + lsm303d[4].toFixed(2) + "<br>Z " + lsm303d[5].toFixed(2) + "<br>Roll " + lsm303d[12].toFixed(0) + "<br>Pitch " + lsm303d[13].toFixed(0) + "<br><br>Magnetometer:<br>X " + lsm303d[9].toFixed(2) + "<br>Y " + lsm303d[10].toFixed(2) + "<br>Z " + lsm303d[11].toFixed(2) + "<br>Heading " + lsm303d[14].toFixed(0) + "°</td>");
             }
-            else response.write("   <td class=\"disabled\"><b><u>LSM303D</u></b>");
+            else response.write("\n   <td class=\"disabled\"><b><u>LSM303D</u></b></td>");
 
             // ====================
 
@@ -340,7 +386,7 @@ function Start(port, multiple, version, logs, debug)
                 var mcp9808 = MCP9808.Get();
                 response.write("\n   <td><b><u>MCP9808</u></b><br><br>Temperature:<br>" + mcp9808[0].toFixed(1) + " °C</td>");
             }
-            else response.write("   <td class=\"disabled\"><b><u>MCP9808</u></b>");
+            else response.write("\n   <td class=\"disabled\"><b><u>MCP9808</u></b></td>");
 
             // ====================
 
@@ -355,9 +401,9 @@ function Start(port, multiple, version, logs, debug)
                 else if (sgp30[0] > 65) iaq = "<font color=\"#008866\">&#x2588;&#x2588;&#x2588;&#x2588;&#x2588;&#x2588;&#x2588;&nbsp;&nbsp;<b>2</b></font><br>Good";
                 else iaq = "<font color=\"#008800\">&#x2588;&#x2588;&#x2588;&#x2588;&#x2588;&#x2588;&#x2588;&nbsp;&nbsp;<b>1</b></font><br>Excellent";
 
-                response.write("\n   <td><b><u>SGP30</u></b><br><br>TVOC:<br>" + sgp30[0].toFixed(0) + " PPB<br>CO<sub>2</sub>eq:<br>" + sgp30[1].toFixed(0) + " PPM<br><br>Ethanol (C<sub>2</sub>H<sub>6</sub>O):<br>" + sgp30[2].toFixed(0) + " PPM<br>Hydrogen (H<sub>2</sub>):<br>" + sgp30[3].toFixed(0) + " PPM<br><br>" + iaq + "</td>\n");
+                response.write("\n   <td><b><u>SGP30</u></b><br><br>TVOC:<br>" + sgp30[0].toFixed(0) + " PPB<br>CO<sub>2</sub>eq:<br>" + sgp30[1].toFixed(0) + " PPM<br><br>Ethanol (C<sub>2</sub>H<sub>6</sub>O):<br>" + sgp30[2].toFixed(0) + " PPM<br>Hydrogen (H<sub>2</sub>):<br>" + sgp30[3].toFixed(0) + " PPM<br><br>" + iaq + "</td>");
             }
-            else response.write("   <td class=\"disabled\"><b><u>SGP30</u></b>");
+            else response.write("\n   <td class=\"disabled\"><b><u>SGP30</u></b></td>");
 
             // ====================
 
@@ -365,7 +411,7 @@ function Start(port, multiple, version, logs, debug)
             {
                 response.write("\n   <td><b><u>SH1107</u></b><br><br>Device<br>enabled</td>");
             }
-            else response.write("   <td class=\"disabled\"><b><u>SH1107</u></b>");
+            else response.write("\n   <td class=\"disabled\"><b><u>SH1107</u></b></td>");
 
             // ====================
 
@@ -374,11 +420,11 @@ function Start(port, multiple, version, logs, debug)
                 var sht31d = SHT31D.Get();
                 response.write("\n   <td><b><u>SHT31D</u></b><br><br>Humidity:<br>" + sht31d[0].toFixed(0) + " %<br><br>Temperature:<br>" + sht31d[1].toFixed(1) + " °C</td>");
             }
-            else response.write("   <td class=\"disabled\"><b><u>SHT31D</u></b>");
+            else response.write("\n   <td class=\"disabled\"><b><u>SHT31D</u></b></td>");
 
             // ====================
 
-            response.write("   <td class=\"disabled\"><b><u>SOUNDS</u></b><br><br>(upcoming<br>module)");
+            response.write("\n   <td class=\"disabled\"><b><u>SOUNDS</u></b><br><br>(upcoming<br>module)");
 
             // ====================
 
@@ -389,7 +435,7 @@ function Start(port, multiple, version, logs, debug)
                 var color = (0x1000000 + rgb).toString(16).slice(1);
                 response.write("\n   <td><b><u>TCS3472</u></b><br><br>Light:&nbsp;&nbsp;&nbsp;" + tcs3472[5] + " lux<br>Temp:&nbsp;&nbsp;&nbsp;" + tcs3472[4] + " °K<br><br>Clear:&nbsp;&nbsp;&nbsp;" + tcs3472[0] + "<br>Red:&nbsp;&nbsp;&nbsp;" + tcs3472[1] + "<br>Green:&nbsp;&nbsp;&nbsp;" + tcs3472[2] + "<br>Blue:&nbsp;&nbsp;&nbsp;" + tcs3472[3] + "<br><br><font color=\"#" + color + "\">&#x2588;&#x2588;&#x2588;&#x2588;&#x2588;&#x2588;&#x2588;</font><br>#" + color + "</td>");
             }
-            else response.write("   <td class=\"disabled\"><b><u>TCS3472</u></b>");
+            else response.write("\n   <td class=\"disabled\"><b><u>TCS3472</u></b></td>");
 
             // ====================
 
@@ -397,7 +443,7 @@ function Start(port, multiple, version, logs, debug)
             {
                 response.write("\n   <td><b><u>TRACKBALL</u></b><br><br>Device<br>enabled</td>");
             }
-            else response.write("   <td class=\"disabled\"><b><u>TRACKBALL</u></b>");
+            else response.write("\n   <td class=\"disabled\"><b><u>TRACKBALL</u></b></td>");
 
             // ====================
 
@@ -406,7 +452,7 @@ function Start(port, multiple, version, logs, debug)
                 var vcnl4010 = VCNL4010.Get();
                 response.write("\n   <td><b><u>VCNL4010</u></b><br><br>Light:<br>" + vcnl4010[0] + " lux<br><br>Proximity:<br>" + vcnl4010[1] + "</td>");
             }
-            else response.write("   <td class=\"disabled\"><b><u>VCNL4010</u></b>");
+            else response.write("\n   <td class=\"disabled\"><b><u>VCNL4010</u></b></td>");
 
             // ====================
 
@@ -423,12 +469,12 @@ function Start(port, multiple, version, logs, debug)
 
                 response.write("\n   <td><b><u>VEML6075</u></b><br><br>UVA:<br>" + veml6075[0].toFixed(0) + "<br>UVB:<br>" + veml6075[1].toFixed(0) + "<br><br>UV Index:<br>" + veml6075[2].toFixed(1) + "<br><br>" + uvi + "</td>\n");
             }
-            else response.write("   <td class=\"disabled\"><b><u>VEML6075</u></b>");
+            else response.write("\n   <td class=\"disabled\"><b><u>VEML6075</u></b></td>");
 
             // ====================
 
             var tempString = '';
-            tempString = '</tr>\n</table>\n<p><a href=\"http://breakouts.xoblite.net/\">Breakout Gardener</a> ' + softwareVersion + ', running on <a href=\"https://nodejs.org/\">Node.js&reg;</a> ' + process.version + ' and using the <a href=\"https://github.com/fivdi/i2c-bus\">i2c-bus</a> library. &copy; 2018-2019 <a href=\"http://breakouts.xoblite.net/\">@xoblite</a>. All trademarks are property of their respective owners.\n';
+            tempString = '\n</tr>\n</table>\n<p><a href=\"http://breakouts.xoblite.net/\">Breakout Gardener</a> ' + softwareVersion + ' (<a href=\"https://raw.githubusercontent.com/xoblite/BreakoutGardener/master/CHANGES.txt\" target=\"_blank\">changes</a>), running on <a href=\"https://nodejs.org/\">Node.js&reg;</a> ' + process.version + ' and using the <a href=\"https://github.com/fivdi/i2c-bus\">i2c-bus</a> library. &copy; 2018-2019 <a href=\"http://breakouts.xoblite.net/\">@xoblite</a>. All trademarks are property of their respective owners.\n';
             response.write(tempString);
 
             response.write("</div>\n</body>\n</html>");

@@ -7,6 +7,10 @@ const i2c = require('i2c-bus'); // -> https://github.com/fivdi/i2c-bus
 const SH1107 = require('./SH1107.js');
 const IS31FL3731_RGB = require('./IS31FL3731_RGB.js');
 const IS31FL3731_WHITE = require('./IS31FL3731_WHITE.js');
+const HT16K33 = require('./HT16K33.js');
+
+const { performance } = require('perf_hooks');
+function Wait(msecs) { const start = performance.now(); while(performance.now() - start < msecs); } // Helper function
 
 module.exports = {
 	Identify: Identify,
@@ -64,7 +68,8 @@ function Start(logs, debug)
 	if (debug) showDebug = true;
 
 	// Configure the device...
-	I2C_BUS.writeByteSync(I2C_ADDRESS_BMP280, 0xe0, 0xb6); // Reset the sensor
+    I2C_BUS.writeByteSync(I2C_ADDRESS_BMP280, 0xe0, 0xb6); // Reset the sensor (might not be needed anymore since we started general I2C soft resetting on startup, but keeping it for now)
+    Wait(25); // "Guesstimate" (not specified in the datasheet)
 	I2C_BUS.writeByteSync(I2C_ADDRESS_BMP280, 0xf4, 0b10110111); // Temp oversampling 16x, Pressure oversampling 16x, Normal (continuous) mode
 	I2C_BUS.writeByteSync(I2C_ADDRESS_BMP280, 0xf5, 0b10010000); // 500 ms interval ("inactive duration"), IIR filter @ standard resolution
 
@@ -189,7 +194,17 @@ function Display(refreshAll)
 	if (IS31FL3731_WHITE.IsAvailable())
 	{
 		IS31FL3731_WHITE.DrawString(Math.round(data[0]).toString());
-	}
+    }
+
+    // ====================
+    
+    if (HT16K33.IsAvailable())
+    {
+        // var temperature = data[0].toFixed(1) + 'C';
+        // HT16K33.Display(temperature);
+        var pressure = data[1].toFixed(0);
+        HT16K33.Display(pressure);
+    }
 
 	// ====================
 

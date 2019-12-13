@@ -7,6 +7,7 @@ const SH1107 = require('./SH1107.js');
 const IS31FL3731_RGB = require('./IS31FL3731_RGB.js');
 const IS31FL3731_WHITE = require('./IS31FL3731_WHITE.js');
 const DRV2605 = require('./DRV2605.js');
+const HT16K33 = require('./HT16K33.js');
 
 module.exports = {
 	IsAvailable: IsAvailable,
@@ -269,7 +270,22 @@ function Display(refreshAll)
         else { for (var n=66; n<77; n++) img[n] = 30; }
 
         IS31FL3731_WHITE.Display(img);
-	}
+    }
+
+    // ====================
+    
+    if (HT16K33.IsAvailable())
+    {
+        var state = 'CHECKING';
+        if (data[0] == 0) state = 'STARTING'; // Starting
+        if (data[0] == 1) state = 'UNPLUGGED'; // Unplugged (not ready)
+        if (data[0] == 2) state = 'PLUGGED'; // Plugged (not charging)
+        if (data[0] == 3) state = 'CHARGING'; // Charging
+        if (data[0] == 4) state = 'ERROR'; // Error
+        if (data[0] == 5) state = 'INTERRUPTED'; // Interrupted
+
+        HT16K33.Display(state);
+    }
 
     // ====================
 

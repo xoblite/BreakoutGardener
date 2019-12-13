@@ -7,6 +7,7 @@ const i2c = require('i2c-bus'); // -> https://github.com/fivdi/i2c-bus
 const SH1107 = require('./SH1107.js');
 const IS31FL3731_RGB = require('./IS31FL3731_RGB.js');
 const IS31FL3731_WHITE = require('./IS31FL3731_WHITE.js');
+const HT16K33 = require('./HT16K33.js');
 
 module.exports = {
 	Identify: Identify,
@@ -335,7 +336,47 @@ function Display(refreshAll)
 		if (data [8] > 0) img[38] = 180;
 
 		IS31FL3731_WHITE.Display(img);
-	}
+    }
+
+    // ====================
+    
+    if (HT16K33.IsAvailable())
+    {
+        // We only have 4 characters to play with (for now at least, without scrolling)
+        // so let's divide the roll/pitch degrees by 10 and present them in truncated "#R#P" format...
+
+        var rollpitch = '';
+
+        var roll;
+        if (data[6] < 0)
+        {
+            rollpitch += '-';
+            roll = -Math.round(data[6]/10);
+        }
+        else
+        {
+            rollpitch += '+';
+            roll = Math.round(data[6]/10);
+        }
+        if (roll > 9) rollpitch += 'R';
+        else rollpitch += roll.toString();
+
+        var pitch;
+        if (data[7] < 0)
+        {
+            rollpitch += '-';
+            pitch = -Math.round(data[7]/10);
+        }
+        else
+        {
+            rollpitch += '+';
+            pitch = Math.round(data[7]/10);
+        }
+        if (pitch > 9) rollpitch += 'P';
+        else rollpitch += pitch.toString();
+
+        HT16K33.Display(rollpitch);
+    }
 
 	// ====================
 

@@ -7,6 +7,7 @@ const { exec } = require('child_process');
 const SH1107 = require('./SH1107.js');
 const IS31FL3731_RGB = require('./IS31FL3731_RGB.js');
 const IS31FL3731_WHITE = require('./IS31FL3731_WHITE.js');
+const HT16K33 = require('./HT16K33.js');
 
 module.exports = {
 	Identify: Identify,
@@ -216,6 +217,14 @@ function Display(refreshAll)
 	{
 		IS31FL3731_WHITE.DrawString(Math.round(data[0]).toString()); // Indoor temperature
 	}
+
+    // ====================
+    
+    if (HT16K33.IsAvailable())
+    {
+        var indoors = data[0].toFixed(1) + 'C';
+        HT16K33.Display(indoors);
+    }
 
 	// ====================
 

@@ -7,6 +7,7 @@ const i2c = require('i2c-bus'); // -> https://github.com/fivdi/i2c-bus
 const SH1107 = require('./SH1107.js');
 const IS31FL3731_RGB = require('./IS31FL3731_RGB.js');
 const IS31FL3731_WHITE = require('./IS31FL3731_WHITE.js');
+const HT16K33 = require('./HT16K33.js');
 
 module.exports = {
 	Start: Start,
@@ -249,6 +250,10 @@ function Display(refreshAll) // Show our little animated friend "Kompis"! :)
         else if (friendMood == FRIEND_RIGHT) IS31FL3731_WHITE.Display(wRight);
         else IS31FL3731_WHITE.Display(wNeutral);
     }
+
+    // ====================
+    
+    if (HT16K33.IsAvailable()) HT16K33.Display(""); // -> Display *BG* (this is the default if no input is provided)
 
 	// ====================
 

@@ -8,6 +8,7 @@ const http = require('http');
 const ADS1015 = require('./ADS1015.js');
 const ADT7410 = require('./ADT7410.js');
 const ADXL343 = require('./ADXL343.js');
+const AS7262 = require('./AS7262.js');
 const BMP280 = require('./BMP280.js');
 const DS18B20 = require('./DS18B20.js');
 const KEBA_P30 = require('./KEBA_P30.js');
@@ -89,6 +90,20 @@ function Start(port, logs, debug)
 				kv += 'adxl343_roll ' + adxl343[6].toFixed(0) + '\n';
 				kv += 'adxl343_pitch ' + adxl343[7].toFixed(0) + '\n';
 				kv += 'adxl343_taps ' + adxl343[8] + '\n';
+				response.write(kv);
+            }
+            
+			// ====================
+
+			if (AS7262.IsAvailable())
+			{
+				var as7262 = AS7262.Get();
+				kv = 'as7262_violet ' + as7262[0] + '\n';
+				kv += 'as7262_blue ' + as7262[1] + '\n';
+				kv += 'as7262_green ' + as7262[2] + '\n';
+				kv += 'as7262_yellow ' + as7262[3] + '\n';
+				kv += 'as7262_orange ' + as7262[4] + '\n';
+				kv += 'as7262_red ' + as7262[5] + '\n';
 				response.write(kv);
 			}
 

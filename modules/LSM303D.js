@@ -7,6 +7,7 @@ const i2c = require('i2c-bus'); // -> https://github.com/fivdi/i2c-bus
 const SH1107 = require('./SH1107.js');
 const IS31FL3731_RGB = require('./IS31FL3731_RGB.js');
 const IS31FL3731_WHITE = require('./IS31FL3731_WHITE.js');
+const HT16K33 = require('./HT16K33.js');
 
 module.exports = {
 	Identify: Identify,
@@ -464,7 +465,23 @@ function Display(refreshAll)
 		else if (hdng <= 293) IS31FL3731_WHITE.DrawString("W");
 		else if (hdng <= 338) IS31FL3731_WHITE.DrawString("NW");
 		else IS31FL3731_WHITE.DrawString("N");
-	}
+    }
+
+    // ====================
+    
+    if (HT16K33.IsAvailable())
+    {
+		// Display the rough compass heading...
+		if (hdng <= 23) HT16K33.Display("-N-");
+		else if (hdng <= 68) HT16K33.Display("-NE-");
+		else if (hdng <= 113) HT16K33.Display("-E-");
+		else if (hdng <= 158) HT16K33.Display("-SE-");
+		else if (hdng <= 203) HT16K33.Display("-S-");
+		else if (hdng <= 248) HT16K33.Display("-SW-");
+		else if (hdng <= 293) HT16K33.Display("-W-");
+		else if (hdng <= 338) HT16K33.Display("-NW-");
+		else HT16K33.Display("-N-");
+    }
 
 	// ====================
 

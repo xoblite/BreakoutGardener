@@ -9,6 +9,7 @@ const { execSync } = require('child_process');
 const SH1107 = require('./SH1107.js');
 const IS31FL3731_RGB = require('./IS31FL3731_RGB.js');
 const IS31FL3731_WHITE = require('./IS31FL3731_WHITE.js');
+const HT16K33 = require('./HT16K33.js');
 
 module.exports = {
     Start: Start,
@@ -230,7 +231,15 @@ function DisplayLoad(refreshAll)
             // ...and a meter showing the relative memory usage...
             IS31FL3731_WHITE.DrawMeter(memoryUsageInPercent, 6);
        }
-	}
+    }
+    
+    // ====================
+
+    if (HT16K33.IsAvailable())
+    {
+        var loadAllCores = Math.round(cpuLoad.AllCores).toString() + '%';
+        HT16K33.Display(loadAllCores);
+    }
 
     // ====================
 
@@ -321,7 +330,15 @@ function DisplayInfo(refreshAll)
                          20,40,40,40,20,20,20,40,40,20,20,
                          20,20,20,20,20,20,20,20,20,20,20 ];
         IS31FL3731_WHITE.Display(pictBG);
-	}
+    }
+    
+    // ====================
+
+    if (HT16K33.IsAvailable())
+    {
+        var loadAllCores = Math.round(cpuLoad.AllCores).toString() + '%';
+        HT16K33.Display(loadAllCores);
+    }
 
     // ====================
 

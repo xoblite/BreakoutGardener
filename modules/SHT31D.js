@@ -8,6 +8,7 @@ const SGP30 = require('./SGP30.js');
 const SH1107 = require('./SH1107.js');
 const IS31FL3731_RGB = require('./IS31FL3731_RGB.js');
 const IS31FL3731_WHITE = require('./IS31FL3731_WHITE.js');
+const HT16K33 = require('./HT16K33.js');
 
 const { performance } = require('perf_hooks');
 function Wait(msecs) { const start = performance.now(); while(performance.now() - start < msecs); } // Helper function
@@ -173,7 +174,15 @@ function Display(refreshAll)
 	{
         // ### PLACEHOLDER: DISPLAYS HUMIDITY AS SIMPLE TWO-DIGIT VALUE ###
 		IS31FL3731_WHITE.DrawString(Math.round(data[0]).toString());
-	}
+    }
+    
+    // ====================
+    
+    if (HT16K33.IsAvailable())
+    {
+        var humidity = Math.round(data[0]) + '%';
+        HT16K33.Display(humidity);
+    }
 
 	// ====================
 

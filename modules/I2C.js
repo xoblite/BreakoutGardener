@@ -8,9 +8,11 @@ const i2c = require('i2c-bus'); // -> https://github.com/fivdi/i2c-bus
 const ADS1015 = require('./ADS1015.js');
 const ADT7410 = require('./ADT7410.js');
 const ADXL343 = require('./ADXL343.js');
+const AS7262 = require('./AS7262.js');
 const BMP280 = require('./BMP280.js');
 const CAP1166 = require('./CAP1166.js');
 const DRV2605 = require('./DRV2605.js');
+const HT16K33 = require('./HT16K33.js');
 const IS31FL3731_RGB = require('./IS31FL3731_RGB.js');
 const IS31FL3731_WHITE = require('./IS31FL3731_WHITE.js');
 const LSM303D = require('./LSM303D.js');
@@ -34,16 +36,18 @@ module.exports = {
 // ================================================================================
 
 // -----------------------------------------------------------------------------------
-// I2C addresses (as of Apr 2019) of some Pimoroni Breakouts and (p)HATs for reference
+// I2C addresses (as of Dec 2019) of some Pimoroni Breakouts and (p)HATs for reference
 // -----------------------------------------------------------------------------------
 
 // Breakouts:
 // * ADS1015 +/-24V ADC Breakout -> 0x48 (default) or 0x49
 // * AS7262 6-channel Spectral Sensor (Spectrometer) Breakout -> 0x49
 // * BH1745 Luminance and Colour Sensor Breakout -> 0x38 (default) or 0x39
+// * BME280 Breakout - Temperature, Pressure, Humidity Sensor -> 0x76 (default) or 0x77
 // * BME680 Breakout - Air Quality, Temperature, Pressure, Humidity Sensor -> 0x76 (default) or 0x77
 // * BMP280 Breakout - Temperature, Pressure, Altitude Sensor -> 0x76 (default) or 0x77
 // * DRV2605L Linear Actuator Haptic Breakout -> 0x5A
+// * DRV8830 DC Motor Driver Breakout -> 0x60 (default), 0x61, 0x63 or 0x64
 // * ICM20948 9DoF Motion Sensor Breakout -> 0x68 (default) or 0x69
 // * IS31FL3731 5x5 RGB LED Matrix Breakout -> 0x74 (default) or 0x77
 // * IS31FL3731 11x7 White LED Matrix Breakout -> 0x75 (default) or 0x77
@@ -52,8 +56,13 @@ module.exports = {
 // * MAX30105 High-Sensitivity Optical ("Smoke Detection") Sensor Breakout -> 0x57
 // * MCP9600 Thermocouple Amplifier Breakout -> 0x38 (default?) or 0x39
 // * MLX90640 Thermal Camera Breakout -> 0x33
+// * MSA301 3DoF Motion Sensor Breakout -> 0x26
 // * N76E003AQ20 MCU Based Trackball Breakout -> 0x0A (default) or 0x0B
+// * RV3028 Real-Time Clock (RTC) Breakout -> 0x52
+// * SGP30 Indoor Air Quality (TVOC and CO2eq) Gas Sensor Breakout -> 0x58
 // * SH1107 1.12" Mono OLED (128x128, white/black) Breakout -> 0x3c (default) or 0x3d
+// * TCA9554A based HT0740 40V / 10A Switch Breakout -> 0x38 (default), 0x39, 0x3A or 0x3B
+// * VEML6075 UVA/B Sensor Breakout -> 0x10
 // * VL53L1X Time of Flight (ToF) Sensor Breakout -> 0x29
 
 // Enviro pHAT:
@@ -63,6 +72,10 @@ module.exports = {
 // * LSM303D accelerometer/magnetometer sensor -> 0x1d 
 // * TCS3472 light and RGB colour sensor -> 0x29,
 //   plus two LEDs for illumination controlled by GPIO #4 (pin 7)
+
+// Four Letter pHAT:
+// * HT16K33 LED controller driver chip -> 0x70
+//   (controlling four 14-segment displays with green LEDs)
 
 // Touch pHAT:
 // * CAP1166 capacitive touch and LED driver chip -> 0x2c
@@ -86,7 +99,7 @@ var I2C_BUS = 0;
 
 // ====================
 
-function Start(outputLogs, showDebug)
+function Start(reset, outputLogs, showDebug)
 {
 	// Open the I2C bus...
 	I2C_BUS = i2c.openSync(1, true);
@@ -103,6 +116,15 @@ function Start(outputLogs, showDebug)
 		if (functions.smbusWriteByte) console.log("Breakout Gardener -> DEBUG -> The adapter can handle SMBus write byte commands.");
 		if (functions.smbusWriteWord) console.log("Breakout Gardener -> DEBUG -> The adapter can handle SMBus write word commands.");
 		if (functions.smbusWriteI2cBlock) console.log("Breakout Gardener -> DEBUG -> The adapter can handle SMBus write I2C block commands.");
+	}
+
+	// ====================
+
+	if (reset) // Soft reset applicable I2C devices upon startup? (in my experience, e.g. the SGP30 becomes more reliable across certain types of restarts with this enabled)
+	{
+		console.log("Breakout Gardener -> INFO -> Starting: Soft resetting applicable I2C devices...");
+		I2C_BUS.sendByteSync(0x00, 0x06); // Soft reset all [supporting/applicable] devices using the I2C General Call address (0x00)...
+        Wait(3000); // Wait 3 seconds, then continue...
 	}
 
 	// ====================
@@ -124,8 +146,8 @@ function Start(outputLogs, showDebug)
 					if (TRACKBALL.Identify(I2C_BUS, devices[i]))
 					{
 						console.log("   • \x1b[32mTRACKBALL\x1b[0m found at I2C address 0x%s (device %s on bus 1).", devices[i].toString(16), i);
+                        break;
 					}
-					break;
 				}
 
 				// ====================
@@ -136,8 +158,8 @@ function Start(outputLogs, showDebug)
 					if (VEML6075.Identify(I2C_BUS, devices[i]))
 					{
 						console.log("   • \x1b[32mVEML6075\x1b[0m UVA/UVB sensor found at I2C address 0x%s (device %s on bus 1).", devices[i].toString(16), i);
+                        break;
 					}
-					break;
 				}
 
 				// ====================
@@ -148,8 +170,8 @@ function Start(outputLogs, showDebug)
 					if (VCNL4010.Identify(I2C_BUS, devices[i]))
 					{
 						console.log("   • \x1b[32mVCNL4010\x1b[0m proximity/light sensor found at I2C address 0x%s (device %s on bus 1).", devices[i].toString(16), i);
+                        break;
 					}
-					break;
 				}
 
 				// ====================
@@ -161,8 +183,8 @@ function Start(outputLogs, showDebug)
 					if (MCP9808.Identify(I2C_BUS, devices[i]))
 					{
 						console.log("   • \x1b[32mMCP9808\x1b[0m high accuracy temperature sensor found at I2C address 0x%s (device %s on bus 1).", devices[i].toString(16), i);
+                        break;
 					}
-					break;
 				}
 
 				// ====================
@@ -175,8 +197,8 @@ function Start(outputLogs, showDebug)
 					if (LSM303D.Identify(I2C_BUS, devices[i]))
 					{
 						console.log("   • \x1b[32mLSM303D\x1b[0m accelerometer/magnetometer sensor found at I2C address 0x%s (device %s on bus 1).", devices[i].toString(16), i);
+                        break;
 					}
-					break;
 				}
 
 				// ====================
@@ -187,8 +209,8 @@ function Start(outputLogs, showDebug)
 					if (TCS3472.Identify(I2C_BUS, devices[i]))
 					{
 						console.log("   • \x1b[32mTCS3472\x1b[0m light and RGB colour sensor found at I2C address 0x%s (device %s on bus 1).", devices[i].toString(16), i);
+                        break;
 					}
-					break;
 				}
 
 				// ====================
@@ -199,8 +221,8 @@ function Start(outputLogs, showDebug)
 					if (CAP1166.Identify(I2C_BUS, devices[i]))
 					{
 						console.log("   • \x1b[32mCAP1166\x1b[0m capacitive touch and LED driver chip [Touch pHAT] found at I2C address 0x%s (device %s on bus 1).", devices[i].toString(16), i);
+                        break;
 					}
-					break;
 				}
 
 				// ====================
@@ -213,8 +235,8 @@ function Start(outputLogs, showDebug)
 					if (SH1107.Identify(I2C_BUS, devices[i]))
 					{
 						console.log("   • \x1b[32mSH1107\x1b[0m 1.12\" Mono OLED (128x128, white/black) found at I2C address 0x%s (device %s on bus 1).", devices[i].toString(16), i);
+                        break;
 					}
-					break;
 				}
 
 				// ====================
@@ -225,8 +247,8 @@ function Start(outputLogs, showDebug)
 					if (SHT31D.Identify(I2C_BUS, devices[i]))
 					{
 						console.log("   • \x1b[32mSHT31D\x1b[0m humidity and temperature sensor found at I2C address 0x%s (device %s on bus 1).", devices[i].toString(16), i);
+                        break;
 					}
-					break;
 				}
 
                 // ====================
@@ -237,26 +259,34 @@ function Start(outputLogs, showDebug)
 					if (ADT7410.Identify(I2C_BUS, devices[i]))
 					{
 						console.log("   • \x1b[32mADT7410\x1b[0m high accuracy temperature sensor found at I2C address 0x%s (device %s on bus 1).", devices[i].toString(16), i);
+                        break;
 					}
-					break;
 				}
 
 				// ====================
 
 				case 0x49: // ##### Analog Devices ADT7410 #####
 						   // -> Adafruit ADT7410 Sensor Breakout (secondary address @ pins "01" -> A1 == 0, A0 == 1)
-						   // ##### Texas Instruments ADS1015 #####
+						   // ##### AMS AS7262 #####
+						   // -> Pimoroni AS7262 Sensor Breakout
+                           // ##### Texas Instruments ADS1015 #####
 						   // -> Pimoroni Enviro pHAT
 				{
 					if (ADT7410.Identify(I2C_BUS, devices[i]))
 					{
 						console.log("   • \x1b[32mADT7410\x1b[0m high accuracy temperature sensor found at I2C address 0x%s (device %s on bus 1).", devices[i].toString(16), i);
+                        break;
 					}
-					else if (ADS1015.Identify(I2C_BUS, devices[i])) // Nb. Needs to be last since there's no way to identify this device
+					else if (AS7262.Identify(I2C_BUS, devices[i]))
+					{
+                        console.log("   • \x1b[32mAS7262\x1b[0m 6-channel spectral sensor (spectrometer) found at I2C address 0x%s (device %s on bus 1).", devices[i].toString(16), i);
+                        break;
+                    }
+                    else if (ADS1015.Identify(I2C_BUS, devices[i])) // Nb. Needs to be last since there's no way to identify this device
 					{
 						console.log("   • \x1b[32mADS1015\x1b[0m 4-channel 5V tolerant 12-bit analog to digital sensor found at I2C address 0x%s (device %s on bus 1).", devices[i].toString(16), i);
-					}
-					break;
+                        break;
+                    }
 				}
 
 				// ====================
@@ -267,20 +297,21 @@ function Start(outputLogs, showDebug)
 					if (ADXL343.Identify(I2C_BUS, devices[i]))
 					{
 						console.log("   • \x1b[32mADXL343\x1b[0m triple-axis accelerometer found at I2C address 0x%s (device %s on bus 1).", devices[i].toString(16), i);
+                        break;
 					}
-					break;
 				}
 
 				// ====================
 
-				case 0x58: // ##### Sensirion SGP30 #####
+                case 0x58: // ##### Sensirion SGP30 #####
+                           // -> Pimoroni SGP30 Sensor Breakout
 						   // -> Adafruit SGP30 Sensor Breakout
 				{
 					if (SGP30.Identify(I2C_BUS, devices[i]))
 					{
 						console.log("   • \x1b[32mSGP30\x1b[0m indoor air quality (TVOC and CO2eq -> IAQ) gas sensor found at I2C address 0x%s (device %s on bus 1).", devices[i].toString(16), i);
+                        break;
 					}
-					break;
                 }
                 
 				// ====================
@@ -291,8 +322,20 @@ function Start(outputLogs, showDebug)
 					if (DRV2605.Identify(I2C_BUS, devices[i]))
 					{
 						console.log("   • \x1b[32mDRV2605\x1b[0m haptic driver found at I2C address 0x%s (device %s on bus 1).", devices[i].toString(16), i);
+                        break;
 					}
-					break;
+                }
+
+				// ====================
+
+				case 0x70: // ##### Holtek HT16K33 #####
+						   // -> Pimoroni Four Letter pHAT
+				{
+					if (HT16K33.Identify(I2C_BUS, devices[i]))
+					{
+						console.log("   • \x1b[32mHT16K33\x1b[0m LED controller driver chip [Four Letter pHAT] found at I2C address 0x%s (device %s on bus 1).", devices[i].toString(16), i);
+                        break;
+					}
 				}
 
 				// ====================
@@ -303,8 +346,8 @@ function Start(outputLogs, showDebug)
 					if (IS31FL3731_RGB.Identify(I2C_BUS, devices[i]))
 					{
 						console.log("   • \x1b[32mIS31FL3731\x1b[0m based RGB LED matrix found at I2C address 0x%s (device %s on bus 1).", devices[i].toString(16), i);
+                        break;
 					}
-					break;
 				}
 
 				// ====================
@@ -315,8 +358,8 @@ function Start(outputLogs, showDebug)
 					if (IS31FL3731_WHITE.Identify(I2C_BUS, devices[i]))
 					{
 						console.log("   • \x1b[32mIS31FL3731\x1b[0m based White LED matrix found at I2C address 0x%s (device %s on bus 1).", devices[i].toString(16), i);
+                        break;
 					}
-					break;
 				}
 
 				// ====================
@@ -327,8 +370,8 @@ function Start(outputLogs, showDebug)
 					if (BMP280.Identify(I2C_BUS, devices[i]))
 					{
 						console.log("   • \x1b[32mBMP280\x1b[0m temperature/pressure sensor found at I2C address 0x%s (device %s on bus 1).", devices[i].toString(16), i);
+                        break;
 					}
-					break;
 				}
 
 				// ====================
@@ -342,18 +385,20 @@ function Start(outputLogs, showDebug)
 					if (BMP280.Identify(I2C_BUS, devices[i]))
 					{
 						console.log("   • \x1b[32mBMP280\x1b[0m temperature/pressure sensor found at I2C address 0x%s (device %s on bus 1).", devices[i].toString(16), i);
+                        break;
 					}
 					else if (IS31FL3731_RGB.Identify(I2C_BUS, devices[i]))
 					{
 						console.log("   • \x1b[32mIS31FL3731\x1b[0m based RGB LED matrix found at I2C address 0x%s (device %s on bus 1).", devices[i].toString(16), i);
+                        break;
 					}
 /*
 					else if (IS31FL3731_WHITE.Identify(I2C_BUS, devices[i]))
 					{
 						console.log("   • \x1b[32mIS31FL3731\x1b[0m based White LED matrix found at I2C address 0x%s (device %s on bus 1).", devices[i].toString(16), i);
+    					break;
 					}
 */
-					break;
 				}
 
 				// ====================

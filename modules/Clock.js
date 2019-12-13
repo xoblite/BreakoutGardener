@@ -6,6 +6,7 @@
 const SH1107 = require('./SH1107.js');
 const IS31FL3731_RGB = require('./IS31FL3731_RGB.js');
 const IS31FL3731_WHITE = require('./IS31FL3731_WHITE.js');
+const HT16K33 = require('./HT16K33.js');
 const DRV2605 = require('./DRV2605.js');
 
 module.exports = {
@@ -163,6 +164,15 @@ function Display(refreshAll)
 			if (time[4] & 8) icon[42] = icon[43] = 70;
 
 			IS31FL3731_WHITE.Display(icon);
+        }
+
+        // ====================
+        
+        if (HT16K33.IsAvailable())
+        {
+            // Display clock in HH.MM format...
+            var clock = time.slice(0,2) + '.' + time.slice(3,5);
+            HT16K33.Display(clock);
         }
 
 		// ====================

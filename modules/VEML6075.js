@@ -7,6 +7,7 @@ const i2c = require('i2c-bus'); // -> https://github.com/fivdi/i2c-bus
 const SH1107 = require('./SH1107.js');
 const IS31FL3731_RGB = require('./IS31FL3731_RGB.js');
 const IS31FL3731_WHITE = require('./IS31FL3731_WHITE.js');
+const HT16K33 = require('./HT16K33.js');
 const DRV2605 = require('./DRV2605.js');
 
 module.exports = {
@@ -241,7 +242,15 @@ function Display(refreshAll)
 		else if (data[3] == 3) IS31FL3731_WHITE.Display(pictHIG); // High
 		else if (data[3] == 2) IS31FL3731_WHITE.Display(pictMOD); // Moderate
 		else IS31FL3731_WHITE.Display(pictLOW); // Low
-	}
+    }
+    
+    // ====================
+    
+    if (HT16K33.IsAvailable())
+    {
+        var uvi = 'UVI' + data[3].toString();
+        HT16K33.Display(uvi);
+    }
 
     // ====================
 

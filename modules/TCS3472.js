@@ -8,6 +8,7 @@ const { execSync } = require('child_process');
 const SH1107 = require('./SH1107.js');
 const IS31FL3731_RGB = require('./IS31FL3731_RGB.js');
 const IS31FL3731_WHITE = require('./IS31FL3731_WHITE.js');
+const HT16K33 = require('./HT16K33.js');
 
 module.exports = {
 	Identify: Identify,
@@ -206,8 +207,15 @@ function Display(refreshAll)
 
 	if (IS31FL3731_WHITE.IsAvailable())
 	{
-		IS31FL3731_WHITE.DrawString("#");
-	}
+		IS31FL3731_WHITE.DrawString("#"); // PLACEHOLDER
+    }
+    
+    // ====================
+    
+    if (HT16K33.IsAvailable())
+    {
+        HT16K33.Display("####"); // PLACEHOLDER
+    }
 
 	// ====================
 

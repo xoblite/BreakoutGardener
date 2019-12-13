@@ -7,6 +7,7 @@ const i2c = require('i2c-bus'); // -> https://github.com/fivdi/i2c-bus
 const SH1107 = require('./SH1107.js');
 const IS31FL3731_RGB = require('./IS31FL3731_RGB.js');
 const IS31FL3731_WHITE = require('./IS31FL3731_WHITE.js');
+const HT16K33 = require('./HT16K33.js');
 
 module.exports = {
 	Identify: Identify,
@@ -249,6 +250,10 @@ function Display(refreshAll)
 			IS31FL3731_WHITE.DrawMeter(voltageInPercentOfMax, n);
 		}
 	}
+
+    // ====================
+    
+    if (HT16K33.IsAvailable()) HT16K33.Display(""); // PLACEHOLDER
 
 	// ====================
 
