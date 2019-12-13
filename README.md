@@ -13,7 +13,7 @@ Breakout Gardener currently supports the following devices and sensors (I2C unle
 - **CAP1166**: Microchip Technology CAP1166 Capacitive Touch Controller ([example](https://shop.pimoroni.com/products/touch-phat))
 - **DRV2605**: Texas Instruments DRV2605 based Pimoroni Linear Actuator Haptic Breakout ([link](https://shop.pimoroni.com/products/drv2605l-linear-actuator-haptic-breakout))
 - **DS18B20**: Maxim Integrated DS18B20 Digital Thermometer ([1-Wire](https://pinout.xyz/pinout/1_wire)) ([example](https://www.adafruit.com/product/381))
-- **HT16K33**: Holtek HT16K33 (LED controller driver chip) based Pimoroni Four Letter pHAT ([link](https://shop.pimoroni.com/products/four-letter-phat))
+- **HT16K33**: Holtek HT16K33 LED Controller Driver based Pimoroni Four Letter pHAT ([link](https://shop.pimoroni.com/products/four-letter-phat))
 - **IS31FL3731 RGB+WHITE**: Integrated Silicon Solution Inc (ISSI) IS31FL3731 Matrix LED Driver ([RGB](https://shop.pimoroni.com/products/5x5-rgb-matrix-breakout), [white](https://shop.pimoroni.com/products/11x7-led-matrix-breakout))
 - **LSM303D**: STMicroelectronics LSM303D eCompass 3D Accelerometer and 3D Magnetometer ([example](https://shop.pimoroni.com/products/enviro-phat))
 - **MCP9808**: Microchip Technology MCP9808 Digital Temperature Sensor ([example](https://www.adafruit.com/product/1782))
