@@ -24,7 +24,7 @@ var SGP30 = {
   manufacturer: "breakouts.xoblite.net", // Manufacturer (optional)
   model: "SGP30", // Model (optional, not changeable by the user)
   // hardwareRevision: "1.0", // Hardware version (optional)
-  firmwareRevision: "19.10.4", // Firmware version (optional)
+  firmwareRevision: "19.12.13", // Firmware version (optional)
   serialNumber: "Breakout Gardener", // Serial number (optional)
   outputLogs: true, // Enable logging to the console?
 }
@@ -32,9 +32,12 @@ var SGP30 = {
 // ================================================================================
 
 var sgp30_iaq_level = 1, sgp30_tvoc = 0.0, sgp30_co2eq = 0; // sgp30_ethanol = 0, sgp30_hydrogen = 0;
+var sgp30_available = false, sgp30_values_found = 0;
 
 function GetFromBG()
 {
+    sgp30_values_found = 0; // This is later used for SGP30 device availability detection via the proxied interface (see below)
+
     http.get(hostBG, (res) =>
     {
         const { statusCode } = res;
@@ -55,37 +58,55 @@ function GetFromBG()
                         if (entries[n].startsWith('sgp30_co2eq')) sgp30_co2eq = parseInt(entries[n].slice(12));
                         // if (entries[n].startsWith('sgp30_ethanol')) sgp30_ethanol = parseInt(entries[n].slice(14)); // Not relevant for HomeKit
                         // if (entries[n].startsWith('sgp30_hydrogen')) sgp30_hydrogen = parseInt(entries[n].slice(15)); // Not relevant for HomeKit
+
+                        sgp30_values_found++; // A(nother) measurement was found -> Apparently an SGP30 device is currently available... :D
                     }
                 }
 
-                if (SGP30.outputLogs)
+                // ====================
+
+                if (sgp30_values_found > 0) // -> SGP30 measurements found via the proxied interface! -> Device currently available! :)
                 {
-                    var tempString = "SGP30 (proxied) -> TVOC \x1b[100;97m " + Math.round(sgp30_tvoc*220) + " PPB (" +  sgp30_tvoc.toFixed(2) + " µg/m3) \x1b[0m / CO2eq \x1b[100;97m " + sgp30_co2eq + " PPM \x1b[0m / IAQ Level \x1b[107;30m ";
-                    if (sgp30_iaq_level == 5) tempString += "5 (Unhealthy) \x1b[0m.";
-                    else if (sgp30_iaq_level == 4) tempString += "4 (Poor) \x1b[0m.";
-                    else if (sgp30_iaq_level == 3) tempString += "3 (Moderate) \x1b[0m.";
-                    else if (sgp30_iaq_level == 2) tempString += "2 (Good) \x1b[0m.";
-                    else tempString += "1 (Excellent) \x1b[0m.";
-                    console.log(tempString);
-            
-                    // console.log("SGP30 (proxied) -> Ethanol " + sgp30_ethanol + " ppm / Hydrogen " + sgp30_hydrogen + " ppm."); // Not relevant for HomeKit
+                    sgp30_available = true;
+
+                    if (SGP30.outputLogs)
+                    {
+                        var tempString = "SGP30 (proxied) -> TVOC \x1b[100;97m " + Math.round(sgp30_tvoc*220) + " PPB (" +  sgp30_tvoc.toFixed(2) + " µg/m3) \x1b[0m / CO2eq \x1b[100;97m " + sgp30_co2eq + " PPM \x1b[0m / IAQ Level \x1b[107;30m ";
+                        if (sgp30_iaq_level == 5) tempString += "5 (Unhealthy) \x1b[0m.";
+                        else if (sgp30_iaq_level == 4) tempString += "4 (Poor) \x1b[0m.";
+                        else if (sgp30_iaq_level == 3) tempString += "3 (Moderate) \x1b[0m.";
+                        else if (sgp30_iaq_level == 2) tempString += "2 (Good) \x1b[0m.";
+                        else tempString += "1 (Excellent) \x1b[0m.";
+                        console.log(tempString);
+                
+                        // console.log("SGP30 (proxied) -> Ethanol " + sgp30_ethanol + " ppm / Hydrogen " + sgp30_hydrogen + " ppm."); // Not relevant for HomeKit
+                    }
+    
+                    // Report the current values it back to HomeKit...
+                    virtualAccessory.getService(Service.AirQualitySensor, "SGP30 IAQ").setCharacteristic(Characteristic.AirQuality, sgp30_iaq_level);
+                    virtualAccessory.getService(Service.AirQualitySensor, "SGP30 IAQ").setCharacteristic(Characteristic.VOCDensity, sgp30_tvoc);
+                    virtualAccessory.getService(Service.AirQualitySensor, "SGP30 IAQ").setCharacteristic(Characteristic.CarbonDioxideLevel, sgp30_co2eq);
+    
+                }
+                else // -> No SGP30 measurements found via the proxied interface! -> Device currently unavailable! :(
+                {
+                    sgp30_available = false;
+                    console.log("%s (proxied) -> ERROR -> Device currently unavailable.", SGP30.name);
                 }
 
-                // Report the current values it back to HomeKit...
-                virtualAccessory.getService(Service.AirQualitySensor, "SGP30 IAQ").setCharacteristic(Characteristic.AirQuality, sgp30_iaq_level);
-                virtualAccessory.getService(Service.AirQualitySensor, "SGP30 IAQ").setCharacteristic(Characteristic.VOCDensity, sgp30_tvoc);
-                virtualAccessory.getService(Service.AirQualitySensor, "SGP30 IAQ").setCharacteristic(Characteristic.CarbonDioxideLevel, sgp30_co2eq);
+                // ====================
             })
         }
         else { res.resume(); return; }
     }).on('error', (msg) => {
+        sgp30_available = false;
         console.log("%s (proxied) -> HTTP ERROR -> %s", SGP30.name, msg);
     });
 }
 
 // ================================================================================
 
-console.log("%s (proxied) -> INFO -> Starting: Running on HomeCore (HAP-NodeJS) %s / Node.js %s.", SGP30.name, require('../package.json').version, process.version);
+console.log("%s (proxied) -> INFO -> Starting: Running on HAP-NodeJS %s / Node.js %s.", SGP30.name, require('../package.json').version, process.version);
 
 // Create our virtual HomeKit accessory...
 var virtualUUID = uuid.generate('hap-nodejs:accessories:airqualitysensor' + SGP30.name);
@@ -118,17 +139,17 @@ virtualAccessory
   .addService(Service.AirQualitySensor, "SGP30 Air Quality")
     .setCharacteristic(Characteristic.AirQuality, sgp30_iaq_level)
     .getCharacteristic(Characteristic.AirQuality)
-        .on('get', function(callback) { callback(null, sgp30_iaq_level); });
+        .on('get', function(callback) { if (sgp30_available) callback(null, sgp30_iaq_level); });
 virtualAccessory
   .getService(Service.AirQualitySensor, "SGP30 Air Quality")
     .setCharacteristic(Characteristic.VOCDensity, sgp30_tvoc)
     .getCharacteristic(Characteristic.VOCDensity)
-        .on('get', function(callback) { callback(null, sgp30_tvoc); })
+        .on('get', function(callback) { if (sgp30_available) callback(null, sgp30_tvoc); })
 virtualAccessory
   .getService(Service.AirQualitySensor, "SGP30 Air Quality")
     .setCharacteristic(Characteristic.CarbonDioxideLevel, sgp30_co2eq)
     .getCharacteristic(Characteristic.CarbonDioxideLevel)
-        .on('get', function(callback) { callback(null, sgp30_co2eq); });
+        .on('get', function(callback) { if (sgp30_available) callback(null, sgp30_co2eq); });
 
 // And finally, start reading device data via Breakout Gardener
 // continously into our proxy's buffer and reporting it back to HomeKit...
