@@ -8,10 +8,12 @@ Breakout Gardener currently supports the following devices and sensors (I2C unle
 - **ADS1015**: Texas Instruments ADS1015 Analog-To-Digital Converter ([example](https://shop.pimoroni.com/products/enviro-phat))
 - **ADT7410**: Analog Devices ADT7410 Digital Temperature Sensor ([example](https://www.adafruit.com/product/4089))
 - **ADXL343**: Analog Devices ADXL343 Triple-Axis Accelerometer ([example](https://www.adafruit.com/product/4097))
+- **AS7262**: AMS AS7262 6-channel Spectral Sensor ([example](https://shop.pimoroni.com/products/as7262-6-channel-spectral-sensor-spectrometer-breakout))
 - **BMP280**: Bosch Sensortec BMP280 Barometric Pressure Sensor ([example](https://shop.pimoroni.com/products/enviro-phat))
 - **CAP1166**: Microchip Technology CAP1166 Capacitive Touch Controller ([example](https://shop.pimoroni.com/products/touch-phat))
 - **DRV2605**: Texas Instruments DRV2605 based Pimoroni Linear Actuator Haptic Breakout ([link](https://shop.pimoroni.com/products/drv2605l-linear-actuator-haptic-breakout))
 - **DS18B20**: Maxim Integrated DS18B20 Digital Thermometer ([1-Wire](https://pinout.xyz/pinout/1_wire)) ([example](https://www.adafruit.com/product/381))
+- **HT16K33**: Holtek HT16K33 LED controller driver chip (as used on the Pimoroni Four Letter pHAT) ([link](https://shop.pimoroni.com/products/four-letter-phat))
 - **IS31FL3731 RGB+WHITE**: Integrated Silicon Solution Inc (ISSI) IS31FL3731 Matrix LED Driver ([RGB](https://shop.pimoroni.com/products/5x5-rgb-matrix-breakout), [white](https://shop.pimoroni.com/products/11x7-led-matrix-breakout))
 - **LSM303D**: STMicroelectronics LSM303D eCompass 3D Accelerometer and 3D Magnetometer ([example](https://shop.pimoroni.com/products/enviro-phat))
 - **MCP9808**: Microchip Technology MCP9808 Digital Temperature Sensor ([example](https://www.adafruit.com/product/1782))
@@ -27,13 +29,13 @@ Breakout Gardener currently supports the following devices and sensors (I2C unle
 
 - **KEBAP30**: KEBA KeContact P30 series wallbox charging station ([link](https://www.keba.com/en/emobility/products/product-overview/product_overview))
 
-It also supports additional display modes through its **SYSTEM**, **CLOCK** and **KOMPIS** modules, Apple® HomeKit™ integration through selected [proxy](https://github.com/xoblite/BreakoutGardener/tree/master/homekit) modules for [HAP-NodeJS](https://github.com/KhaosT/HAP-NodeJS), data [exposure](https://prometheus.io/) and related [visualization](https://grafana.com/) through its **PROMETHEUS** module, as well as a HTML5/CSS3 browser **DASHBOARD** module (see image above) that provides an overview of the current status and readings of all sensors and devices available on the system (nb. the "Shop" button is there just to support the tinkering community's favourite suppliers; [Pimoroni (UK)](https://pimoroni.com/) and [Adafruit Industries (US)](https://www.adafruit.com/) (no affiliation to either, I just like their products and geeky dedication to the cause :wink:)).
+It also supports additional display modes through its **SYSTEM**, **CLOCK** and **KOMPIS** modules, Apple® HomeKit™ integration through selected [proxy](https://github.com/xoblite/BreakoutGardener/tree/master/homekit) modules for [HAP-NodeJS](https://github.com/KhaosT/HAP-NodeJS), data [exposure](https://prometheus.io/) and related [visualization](https://grafana.com/) through its **PROMETHEUS** module, as well as a HTML5/CSS3 browser **DASHBOARD** module (see screenshot of version R2B above) that provides an overview of the current status and readings of all sensors and devices available on the system (nb. the "Shop" button is there just to support the tinkering community's favourite suppliers; [Pimoroni (UK)](https://pimoroni.com/) and [Adafruit Industries (US)](https://www.adafruit.com/) (no affiliation to either, I just like their products and geeky dedication to the cause :wink:)).
 
 Anyway, without further ado:
 
 *- Install [Node.js](https://nodejs.org/) (I have tested with v10.16.x LTS)*
 <br>*- Clone this repository*
-<br>*- Install [i2c-bus](https://github.com/fivdi/i2c-bus) (I have tested with v5.0.0)*
+<br>*- Install [i2c-bus](https://github.com/fivdi/i2c-bus) (I have tested with v5.1.0)*
 <br>*- Run!*
 
 Enjoy! :sunglasses:
