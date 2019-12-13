@@ -3,6 +3,20 @@
 // (c) 2018-2019 Karl-Henrik Henriksson - breakouts*xoblite.net - http://breakouts.xoblite.net/
 // ============================================================================================
 
+------------------------------------------------------------ Version 19.12.13 (R2C) ----------
+
+- Added support for the AMS AS7262 6-channel Spectral Sensor (-> violet/blue/green/yellow/orange/red spectrometer)
+  * Use of the illuminations LEDs can be enabled using the setting as7262LEDEnable at the top of Breakout_Gardener.js
+- Added support for the Holtek HT16K33 based Pimoroni Four Letter pHAT (-> four 14-segment displays with green LEDs)
+
+- Added SGP30 device availability detection for the "proxied" interface towards Apple HomeKit (see R2A below)
+
+- Now optionally soft resetting all [supporting/applicable] devices also on startup (previously only on exit)
+  (nb. this takes a few extra seconds on startup, but may improve device re-reachability after certain errors etc;
+  disable the setting resetI2CDevicesOnStartup at the top of Breakout_Gardener.js if your device doesn't like this!)
+- Added a link to the latest CHANGES.txt on GitHub to the footer of the DASHBOARD
+- Minor fixes and polishing
+
 ------------------------------------------------------------- Version 19.10.4 (R2B) ----------
 
 - Added support for the Sensirion SHT31D Humidity & Temperature Sensor
@@ -16,7 +30,7 @@
 - Changed most bus wait states from somewhat unpredictable/async setTimeout() variants to maybe less elegant
   but also more predictable performance.now based busy loops (nb. doesn't matter much in our case anyway)
 
-- With 20 modules now available, the default DASHBOARD display mode is now to use multiple rows
+- With ~20 modules now available, the default DASHBOARD display mode is now to use multiple rows
   of 10 modules each (nb. this is configurable from the top of Breakout_Gardener.js though; single row
   still looks quite cool on ultra-wide desktop displays but is much less practical on smaller displays)
 

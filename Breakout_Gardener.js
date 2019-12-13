@@ -5,17 +5,19 @@
 // ============================================================================================
 
 const softwareName = "Breakout Gardener";
-const softwareVersion = "19.10.4 (R2B)";
+const softwareVersion = "19.12.13 (R2C)";
 
 const I2C = require('./modules/I2C.js'); // Requires the i2c-bus library -> https://github.com/fivdi/i2c-bus
 
 const ADS1015 = require('./modules/ADS1015.js');
 const ADT7410 = require('./modules/ADT7410.js');
 const ADXL343 = require('./modules/ADXL343.js');
+const AS7262 = require('./modules/AS7262.js');
 const BMP280 = require('./modules/BMP280.js');
 const CAP1166 = require('./modules/CAP1166.js');
 const DRV2605 = require('./modules/DRV2605.js');
 const DS18B20 = require('./modules/DS18B20.js');
+const HT16K33 = require('./modules/HT16K33.js');
 const IS31FL3731_RGB = require('./modules/IS31FL3731_RGB.js');
 const IS31FL3731_WHITE = require('./modules/IS31FL3731_WHITE.js');
 const KEBA_P30 = require('./modules/KEBA_P30.js');
@@ -24,6 +26,7 @@ const MCP9808 = require('./modules/MCP9808.js');
 const SGP30 = require('./modules/SGP30.js');
 const SH1107 = require('./modules/SH1107.js');
 const SHT31D = require('./modules/SHT31D.js');
+//const ST7789V = require('./modules/ST7789V.js'); // Note: SPI based -> Potential "R3" candidate (yet to be decided)
 const TRACKBALL = require('./modules/Trackball.js');
 const TCS3472 = require('./modules/TCS3472.js');
 const VCNL4010 = require('./modules/VCNL4010.js');
@@ -42,7 +45,8 @@ const PROMETHEUS = require('./modules/Prometheus.js');
 // General settings
 const outputLogs = true;
 const showDebug = false;
-const resetI2CDevicesOnExit = true; // Soft reset applicable I2C devices upon exit? (in my experience, e.g. the SGP30 becomes more reliable across restarts with this enabled)
+const resetI2CDevicesOnStartup = false; // Soft reset applicable I2C devices upon startup? (in my experience, e.g. the SGP30 becomes more reliable across certain types of restarts with this enabled)
+const resetI2CDevicesOnExit = true; // Soft reset applicable I2C devices upon exit? (...)
 
 // DASHBOARD related settings
 const dashboardEnabled = true; // Enable dashboard server?
@@ -59,6 +63,9 @@ const prometheusPort = 9091; // Prometheus exposure server port (when enabled)
 // for further information see e.g. https://pinout.xyz/pinout/1_wire )
 var ds18b20Sensors = ['28-01183392d2ff', '28-011833915dff'];
 
+// AS7262 related settings
+var as7262LEDEnable = false; // Enable the AS7262 illumination LED? (i.e. turning on for each measurement and then turning off again)
+
 // LSM303D related settings
 var lsm303dDisplayRaw = false; // Display motion data as raw sensor values instead of as scale adjusted g/gauss units?
 var lsm303dHeadingCalibration = 0; // Manual compass heading calibration (in case it's needed [?])
@@ -66,8 +73,12 @@ var lsm303dHeadingCalibration = 0; // Manual compass heading calibration (in cas
 // TCS3472 related settings
 var tcs3472LEDEnable = false; // Enable the TCS3472 illumination LEDs on the Enviro pHAT?
 
+// ST7789V related settings
+//var st7789vEnable = true; // Enable the ST7789V module? (nb. this requires SPI to be enabled on the host)
+//var st7789vUseFrontSlot = true; // Use the front "0.1" (true) or back "0.0" (false) SPI slot on Breakout Garden SPI for the display?
+
 // KEBA P30 related settings
-var kebap30Enable = false; // Enable the KEBA P30 wallbox charger module?
+var kebap30Enable = true; // Enable the KEBA P30 wallbox charger module?
 var kebap30IPAddress = '192.168.1.23'; // Wallbox IP address
 
 // ================================================================================
@@ -77,7 +88,7 @@ var kebap30IPAddress = '192.168.1.23'; // Wallbox IP address
 console.log("%s -> INFO -> Starting: Version %s, running on Node.js %s.", softwareName, softwareVersion, process.version);
 
 // Open the I2C bus and scan for devices...
-I2C.Start(outputLogs, showDebug);
+I2C.Start(resetI2CDevicesOnStartup, outputLogs, showDebug);
 
 // Start and initialize all supporting subsystems...
 SYSTEM.Start(outputLogs, showDebug);
@@ -86,11 +97,14 @@ KOMPIS.Start(outputLogs, showDebug);
 if (SH1107.IsAvailable()) SH1107.Start(outputLogs, showDebug);
 if (IS31FL3731_RGB.IsAvailable()) IS31FL3731_RGB.Start(outputLogs, showDebug);
 if (IS31FL3731_WHITE.IsAvailable()) IS31FL3731_WHITE.Start(outputLogs, showDebug);
+//if (st7789vEnable) ST7789V.Start(st7789vUseFrontSlot, outputLogs, showDebug);
+if (HT16K33.IsAvailable()) HT16K33.Start(outputLogs, showDebug);
 if (DRV2605.IsAvailable()) DRV2605.Start(outputLogs, showDebug);
 
 if (ADS1015.IsAvailable()) ADS1015.Start(outputLogs, showDebug);
 if (ADT7410.IsAvailable()) ADT7410.Start(outputLogs, showDebug);
 if (ADXL343.IsAvailable()) ADXL343.Start(outputLogs, showDebug);
+if (AS7262.IsAvailable()) AS7262.Start(as7262LEDEnable, outputLogs, showDebug);
 if (BMP280.IsAvailable()) BMP280.Start(outputLogs, showDebug);
 if (CAP1166.IsAvailable()) CAP1166.Start(outputLogs, showDebug);
 if (LSM303D.IsAvailable()) LSM303D.Start(lsm303dHeadingCalibration, lsm303dDisplayRaw, outputLogs, showDebug);
@@ -123,16 +137,17 @@ const DISPLAY_MODE_KOMPIS_FRIEND = 4;
 const DISPLAY_MODE_ADS1015 = 5;
 const DISPLAY_MODE_ADT7410 = 6;
 const DISPLAY_MODE_ADXL343 = 7;
-const DISPLAY_MODE_BMP280 = 8;
-const DISPLAY_MODE_DS18B20 = 9;
-const DISPLAY_MODE_KEBAP30 = 10;
-const DISPLAY_MODE_LSM303D = 11;
-const DISPLAY_MODE_MCP9808 = 12;
-const DISPLAY_MODE_SGP30 = 13;
-const DISPLAY_MODE_SHT31D = 14;
-const DISPLAY_MODE_TCS3472 = 15;
-const DISPLAY_MODE_VCNL4010 = 16;
-const DISPLAY_MODE_VEML6075 = 17;
+const DISPLAY_MODE_AS7262 = 8;
+const DISPLAY_MODE_BMP280 = 9;
+const DISPLAY_MODE_DS18B20 = 10;
+const DISPLAY_MODE_KEBAP30 = 11;
+const DISPLAY_MODE_LSM303D = 12;
+const DISPLAY_MODE_MCP9808 = 13;
+const DISPLAY_MODE_SGP30 = 14;
+const DISPLAY_MODE_SHT31D = 15;
+const DISPLAY_MODE_TCS3472 = 16;
+const DISPLAY_MODE_VCNL4010 = 17;
+const DISPLAY_MODE_VEML6075 = 18;
 
 // The actual order of the display modes... (auto-rotating unless locked)
 const displayModes = [
@@ -146,6 +161,7 @@ const displayModes = [
     DISPLAY_MODE_SGP30,
     DISPLAY_MODE_VEML6075,
     DISPLAY_MODE_VCNL4010,
+    DISPLAY_MODE_AS7262,
     DISPLAY_MODE_TCS3472,
     DISPLAY_MODE_LSM303D,
     DISPLAY_MODE_ADXL343,
@@ -185,6 +201,7 @@ function updateDisplayMode()
         case DISPLAY_MODE_ADS1015: { if (ADS1015.IsAvailable()) moduleIsAvailable = true; break; }
         case DISPLAY_MODE_ADT7410: { if (ADT7410.IsAvailable()) moduleIsAvailable = true; break; }
         case DISPLAY_MODE_ADXL343: { if (ADXL343.IsAvailable()) moduleIsAvailable = true; break; }
+        case DISPLAY_MODE_AS7262: { if (AS7262.IsAvailable()) moduleIsAvailable = true; break; }
         case DISPLAY_MODE_BMP280: { if (BMP280.IsAvailable()) moduleIsAvailable = true; break; }
         case DISPLAY_MODE_DS18B20: { if (DS18B20.IsAvailable()) moduleIsAvailable = true; break; }
         case DISPLAY_MODE_KEBAP30: { if (KEBA_P30.IsAvailable()) moduleIsAvailable = true; break; }
@@ -211,6 +228,7 @@ function updateDisplayMode()
             case DISPLAY_MODE_ADS1015: { ADS1015.Display(refreshAll); break; }
             case DISPLAY_MODE_ADT7410: { ADT7410.Display(refreshAll); break; }
             case DISPLAY_MODE_ADXL343: { ADXL343.Display(refreshAll); break; }
+            case DISPLAY_MODE_AS7262: { AS7262.Display(refreshAll); break; }
             case DISPLAY_MODE_BMP280: { BMP280.Display(refreshAll); break; }
             case DISPLAY_MODE_DS18B20: { DS18B20.Display(refreshAll); break; }
             case DISPLAY_MODE_KEBAP30: { KEBA_P30.Display(refreshAll); break; }
@@ -297,9 +315,10 @@ function pollTrackball() // Periodic trackball polling function (see setInterval
                 if (displaysTurnedOff)
                 {
                     displaysTurnedOff = false;
-                    SH1107.On();
-                    IS31FL3731_RGB.On();
-                    IS31FL3731_WHITE.On();
+                    if (SH1107.IsAvailable()) SH1107.On();
+                    if (IS31FL3731_RGB.IsAvailable()) IS31FL3731_RGB.On();
+                    if (IS31FL3731_WHITE.IsAvailable()) IS31FL3731_WHITE.On();
+                    if (HT16K33.IsAvailable()) HT16K33.On();
                 }
             }
             else if (trackballClickCounter == 3) // Long press -> Turn off/on displays
@@ -310,17 +329,19 @@ function pollTrackball() // Periodic trackball polling function (see setInterval
                 {
                     displaysTurnedOff = false;
                     previousDisplayMode = 0xffff;
-                    SH1107.On();
-                    IS31FL3731_RGB.On();
-                    IS31FL3731_WHITE.On();
+                    if (SH1107.IsAvailable()) SH1107.On();
+                    if (IS31FL3731_RGB.IsAvailable()) IS31FL3731_RGB.On();
+                    if (IS31FL3731_WHITE.IsAvailable()) IS31FL3731_WHITE.On();
+                    if (HT16K33.IsAvailable()) HT16K33.On();
                 }
                 else
                 {
                     clearInterval(displayModeInterval);
                     displaysTurnedOff = true;
-                    SH1107.Off();
-                    IS31FL3731_RGB.Off();
-                    IS31FL3731_WHITE.Off();
+                    if (SH1107.IsAvailable()) SH1107.Off();
+                    if (IS31FL3731_RGB.IsAvailable()) IS31FL3731_RGB.Off();
+                    if (IS31FL3731_WHITE.IsAvailable()) IS31FL3731_WHITE.Off();
+                    if (HT16K33.IsAvailable()) HT16K33.Off();
                 }
             }
         }
@@ -392,17 +413,19 @@ function pollTouchButtons() // Periodic touch polling function (see setInterval(
             {
                 displaysTurnedOff = false;
                 previousDisplayMode = 0xffff;
-                SH1107.On();
-                IS31FL3731_RGB.On();
-                IS31FL3731_WHITE.On();
+                if (SH1107.IsAvailable()) SH1107.On();
+                if (IS31FL3731_RGB.IsAvailable()) IS31FL3731_RGB.On();
+                if (IS31FL3731_WHITE.IsAvailable()) IS31FL3731_WHITE.On();
+                if (HT16K33.IsAvailable()) HT16K33.On();
             }
             else
             {
                 clearInterval(displayModeInterval);
                 displaysTurnedOff = true;
-                SH1107.Off();
-                IS31FL3731_RGB.Off();
-                IS31FL3731_WHITE.Off();
+                if (SH1107.IsAvailable()) SH1107.Off();
+                if (IS31FL3731_RGB.IsAvailable()) IS31FL3731_RGB.Off();
+                if (IS31FL3731_WHITE.IsAvailable()) IS31FL3731_WHITE.Off();
+                if (HT16K33.IsAvailable()) HT16K33.Off();
             }
         }
 
@@ -481,11 +504,14 @@ function StopAll()
     if (LSM303D.IsAvailable()) LSM303D.Stop();
     if (CAP1166.IsAvailable()) CAP1166.Stop();
     if (BMP280.IsAvailable()) BMP280.Stop();
+    if (AS7262.IsAvailable()) AS7262.Stop();
     if (ADXL343.IsAvailable()) ADXL343.Stop();
     if (ADT7410.IsAvailable()) ADT7410.Stop();
     if (ADS1015.IsAvailable()) ADS1015.Stop();
 
     if (DRV2605.IsAvailable()) DRV2605.Stop();
+    if (HT16K33.IsAvailable()) HT16K33.Stop();
+    //if (ST7789V.IsAvailable()) ST7789V.Stop();
     if (IS31FL3731_WHITE.IsAvailable()) IS31FL3731_WHITE.Stop();
     if (IS31FL3731_RGB.IsAvailable()) IS31FL3731_RGB.Stop();
     if (SH1107.IsAvailable()) SH1107.Stop();
